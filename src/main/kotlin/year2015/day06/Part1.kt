@@ -1,6 +1,5 @@
 package year2015.day06
 
-
 fun main() {
     val lights = Array(1000) { BooleanArray(1000) { false } }
 
