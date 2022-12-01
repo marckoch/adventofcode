@@ -9,19 +9,14 @@ fun main() {
 // aggregate the lines until blank line is reached, then start next elf
 // for the sample on web page this would produce a list: 6000, 4000, 11000, 24000, ...
 fun getListOfTotalCalories(): List<Int> {
-    val totalCalories = mutableListOf(0)
-    var currentElf = 0
-
-    INPUT.lines().forEach { line ->
+    return INPUT.lines().fold(mutableListOf(0)) { list, line ->
         if (line.isEmpty()) {
-            currentElf++
-            totalCalories.add(0)
+            list.add(0)
         } else {
-            totalCalories[currentElf] += line.toInt()
+            list[list.lastIndex] += line.toInt()
         }
-
+        list
     }
-    return totalCalories
 }
 
 fun part1() {
