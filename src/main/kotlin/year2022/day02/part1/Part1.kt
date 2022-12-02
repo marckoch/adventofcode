@@ -9,16 +9,16 @@ fun main() {
 
 // matrix of win situations
 // row is opponents move (A,B,C), column is my move (X,Y,Z),
-// element is result of this round: 0 means draw, 1 I win, -1, I lose
+// element is result of this round: 3 means draw, 6 I win, 0 I lose
 //
 //      X(R) Y(P) Z(S)
-// A(R)   0    1   -1
-// B(P)  -1    0    1
-// C(S)   1   -1    0
+// A(R)  3    6    0
+// B(P)  0    3    6
+// C(S)  6    0    3
 val winMatrix = arrayOf(
-    arrayOf( 0,  1, -1),
-    arrayOf(-1,  0,  1),
-    arrayOf( 1, -1,  0)
+    arrayOf(3, 6, 0),
+    arrayOf(0, 3, 6),
+    arrayOf(6, 0, 3)
 )
 
 fun getScoresPerRound(): List<Int> {
@@ -32,11 +32,5 @@ fun getScore(line: String): Int {
 
     val result = winMatrix[opponentsMove][myMove]
 
-    return shapeISelected(myMove) + outcomeOfRound(result)
+    return shapeISelected(myMove) + result
 }
-
-// input -> output
-// -1       0           I lose
-// 0        3           draw
-// 1        6           I win
-fun outcomeOfRound(result: Int): Int = 3 + 3 * result
