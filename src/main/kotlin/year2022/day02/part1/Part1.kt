@@ -2,9 +2,10 @@ package year2022.day02.part1
 
 import year2022.day02.INPUT
 import year2022.day02.shapeISelected
+import year2022.day02.toIndices
 
 fun main() {
-    println(getScoresPerRound().sum())
+    println(INPUT.lines().sumOf { getScore(it) })
 }
 
 // matrix of win situations
@@ -21,14 +22,9 @@ val winMatrix = arrayOf(
     arrayOf(6, 0, 3)
 )
 
-fun getScoresPerRound(): List<Int> {
-    return INPUT.lines().map { getScore(it) }
-}
-
 // map line of input ("A X") to result of this round
 fun getScore(line: String): Int {
-    val opponentsMove = line.first().code - 'A'.code    // will be rowIndex (0,1,2)
-    val myMove = line.trim().last().code - 'X'.code     // will be colIndex (0,1,2)
+    val (opponentsMove, myMove) = toIndices(line)
 
     val result = winMatrix[opponentsMove][myMove]
 

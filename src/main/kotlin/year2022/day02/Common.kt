@@ -3,6 +3,15 @@ package year2022.day02
 // returns 1 for Rock, 2 for Paper, 3 for Scissors
 fun shapeISelected(myMove: Int): Int = myMove + 1
 
+// map line of input ("A X") to indices (first is 'A' based, last is 'X' based),
+// "A X" would return 0,0
+fun toIndices(line: String): Pair<Int, Int> {
+    val opponentsMove = line.first().code - 'A'.code    // will be rowIndex (0, 1, 2)
+    val myMove = line.trim().last().code - 'X'.code     // will be colIndex (0, 1, 2)
+
+    return Pair(opponentsMove, myMove)
+}
+
 const val INPUT = """C Z
 C Z
 A X
