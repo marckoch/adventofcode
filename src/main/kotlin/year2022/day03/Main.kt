@@ -23,9 +23,10 @@ fun part2() {
 }
 
 fun findCommonCharIn(strings: List<String>): Char {
-    val common = strings.fold(charsOf(strings[0])) { acc, i -> (acc intersect charsOf(i)).toList() }
-    assert(common.size == 1)
-    return common.first()
+    return strings
+        .map { charsOf(it) }
+        .reduce { acc, i -> (acc intersect i).toList() }
+        .first()
 }
 
 fun itemPriorityOf(c: Char): Int {

@@ -20,9 +20,16 @@ fun getListOfTotalCalories(): List<Int> {
 }
 
 fun part1() {
-    println(getListOfTotalCalories().maxOrNull())
+    getListOfTotalCalories()
+        .maxOrNull()
+        .let { println(it) }
 }
 
 fun part2() {
-    println(getListOfTotalCalories().sorted().reversed().take(3).sum())
+    getListOfTotalCalories()
+        .sorted()
+        .reversed()
+        .take(3)
+        .sum()
+        .let { println(it) }
 }

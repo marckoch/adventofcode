@@ -5,7 +5,9 @@ import year2022.day02.shapeISelected
 import year2022.day02.toIndices
 
 fun main() {
-    println(INPUT.lines().sumOf { getScore(it) })
+    INPUT.lines()
+        .sumOf { getScore(it) }
+        .let { println(it) }
 }
 
 // matrix of win situations
