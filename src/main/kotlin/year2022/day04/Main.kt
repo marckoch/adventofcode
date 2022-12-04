@@ -19,7 +19,7 @@ fun part2() {
 }
 
 fun oneAreaCoversOtherArea(line: String): Boolean {
-    val (start1, end1, start2, end2) = extractIntsFrom(line)
+    val (start1, end1, start2, end2) = parse(line)
 
     val firstCoversSecond = (start1 <= start2 && end2 <= end1)
     val secondCoversFirst = (start2 <= start1 && end1 <= end2)
@@ -28,7 +28,7 @@ fun oneAreaCoversOtherArea(line: String): Boolean {
 }
 
 fun hasOverlap(line: String): Boolean {
-    val (start1, end1, start2, end2) = extractIntsFrom(line)
+    val (start1, end1, start2, end2) = parse(line)
 
     val firstBeforeSecond = end1 < start2   // without overlap
     val firstAfterSecond = end2 < start1    // without overlap
@@ -36,4 +36,4 @@ fun hasOverlap(line: String): Boolean {
     return !(firstBeforeSecond || firstAfterSecond)
 }
 
-fun extractIntsFrom(s: String) = s.split(",", "-").map { it.toInt() }
+fun parse(s: String) = s.split(",", "-").map { it.toInt() }
