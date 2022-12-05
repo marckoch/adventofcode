@@ -1,48 +1,36 @@
 package year2021.day02
 
 fun main() {
-    part1(SAMPLE)
-    part1(INPUT)
+    solve(Part1::proceed, SAMPLE)
+    solve(Part1::proceed, INPUT)
 
-    part2(SAMPLE)
-    part2(INPUT)
-}
-
-fun part1(input: String) {
-    solve(Part1.start, Part1::proceed, input)
-}
-
-fun part2(input: String) {
-    solve(Part2.start, Part2::proceed, input)
+    solve(Part2::proceed, SAMPLE)
+    solve(Part2::proceed, INPUT)
 }
 
 object Part1 {
-    val start = listOf(0, 0)
+    fun proceed(pos: Position, move: Move): Position {
+        val newHorizontal = pos.horizontal + move.horizontal
+        val newDepth = pos.depth + move.depth
 
-    fun proceed(acc: List<Int>, move: Move): List<Int> {
-        val newHorizontal = acc[0] + move.first
-        val newDepth = acc[1] + move.second
-
-        return listOf(newHorizontal, newDepth)
+        return Position(newHorizontal, newDepth)
     }
 }
 
 object Part2 {
-    val start = listOf(0, 0, 0)
+    fun proceed(pos: Position, move: Move): Position {
+        val newHorizontal = pos.horizontal + move.horizontal
+        val newDepth = pos.depth + pos.aim * move.horizontal
+        val newAim = pos.aim + move.depth
 
-    fun proceed(acc: List<Int>, move: Move): List<Int> {
-        val newHorizontal = acc[0] + move.first
-        val newDepth = acc[1] + acc[2] * move.first
-        val newAim = acc[2] + move.second
-
-        return listOf(newHorizontal, newDepth, newAim)
+        return Position(newHorizontal, newDepth, newAim)
     }
 }
 
-fun solve(start: List<Int>, proceed: (List<Int>, Move) -> List<Int>, input: String) {
+fun solve(proceed: (Position, Move) -> Position, input: String) {
     input.lines()
-        .fold(start) { acc, s -> proceed(acc, parse(s)) }
-        .let { println(it[0] * it[1]) }
+        .fold(Position()) { acc, s -> proceed(acc, parse(s)) }
+        .let { println(it.horizontal * it.depth) }
 }
 
 // parse input line and return Pair of steps in (forward, up/down)
@@ -50,11 +38,13 @@ fun solve(start: List<Int>, proceed: (List<Int>, Move) -> List<Int>, input: Stri
 fun parse(line: String): Move {
     val (command, number) = line.split(" ")
     return when (command) {
-        "forward" -> Pair(number.toInt(), 0)
-        "up" -> Pair(0, -number.toInt())
-        "down" -> Pair(0, number.toInt())
+        "forward" -> Move(number.toInt(), 0)
+        "up" -> Move(0, -number.toInt())
+        "down" -> Move(0, number.toInt())
         else -> throw IllegalArgumentException("problem with $line")
     }
 }
 
-typealias Move = Pair<Int, Int>
+class Move(val horizontal: Int = 0, val depth: Int = 0)
+
+class Position(val horizontal: Int = 0, val depth: Int = 0, val aim: Int = 0)
