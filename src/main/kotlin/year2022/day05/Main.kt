@@ -1,17 +1,17 @@
 package year2022.day05
 
 fun main() {
-    // VGBBJCRMN
-    solve(Part1::moveFromTo)
+    solve(SampleInput(), Part1::moveCrates)
+    solve(SampleInput(), Part2::moveCrates)
 
+    // VGBBJCRMN
+    solve(RealInput(), Part1::moveCrates)
     // LBBVJBRMH
-//    solve(Part2::moveFromTo)
+    solve(RealInput(), Part2::moveCrates)
 }
 
-val regex = Regex("""move (\d+) from (\d) to (\d)""")
-
 object Part1 {
-    fun moveFromTo(stacks: Stacks, noOfCrates: Int, from: Int, to: Int): Stacks {
+    fun moveCrates(stacks: Stacks, noOfCrates: Int, from: Int, to: Int): Stacks {
         repeat(noOfCrates) {
             val element = stacks[from].removeLast()
             stacks[to].add(element)
@@ -21,7 +21,7 @@ object Part1 {
 }
 
 object Part2 {
-    fun moveFromTo(stacks: Stacks, noOfCrates: Int, from: Int, to: Int): Stacks {
+    fun moveCrates(stacks: Stacks, noOfCrates: Int, from: Int, to: Int): Stacks {
         val elements = stacks[from].takeLast(noOfCrates)
         repeat(noOfCrates) { stacks[from].removeLast() }
         stacks[to].addAll(elements)
@@ -29,10 +29,10 @@ object Part2 {
     }
 }
 
-fun solve(move: (stacks: Stacks, noOfCrates: Int, from: Int, to: Int) -> Stacks) {
-    INPUT.lines()
+fun solve(input: Input, move: (stacks: Stacks, noOfCrates: Int, from: Int, to: Int) -> Stacks) {
+    input.moves()
         .map { parse(it) }
-        .fold(stacks) { acc, ints ->
+        .fold(input.stacks) { acc, ints ->
             move(acc, ints[0], ints[1] - 1, ints[2] - 1)
         }
         .let { printTopContainers(it) }
@@ -47,9 +47,7 @@ fun printTopContainers(stacks: Stacks) {
 
 // parse line 'move $count from $from to $to' and return list with (count, from, to)
 fun parse(line: String): List<Int> {
-    val matchResult = regex.find(line)
+    val matchResult = Regex("""move (\d+) from (\d) to (\d)""").find(line)
     val (count, from, to) = matchResult!!.destructured
     return listOf(count, from, to).map { s -> s.toInt() }
 }
-
-typealias Stacks = List<MutableList<Char>>
