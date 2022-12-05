@@ -1,5 +1,20 @@
 package year2022.day01
 
+val SAMPLE = """1000
+2000
+3000
+
+4000
+
+5000
+6000
+
+7000
+8000
+9000
+
+10000""".trimIndent()
+
 const val INPUT = """
 6110
 2550

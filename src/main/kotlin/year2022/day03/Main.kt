@@ -1,21 +1,23 @@
 package year2022.day03
 
 fun main() {
-    part1()
+    part1(SAMPLE)
+    part1(INPUT)
 
-    part2()
+    part2(SAMPLE)
+    part2(INPUT)
 }
 
-fun part1() {
-    INPUT.lines()
+fun part1(input: String) {
+    input.lines()
         .map { it.chunked(it.length / 2) }
         .map { findCommonCharIn(it) }
         .sumOf { itemPriorityOf(it) }
         .let { println(it) }
 }
 
-fun part2() {
-    INPUT.lines()
+fun part2(input: String) {
+    input.lines()
         .chunked(3)
         .map { findCommonCharIn(it) }
         .sumOf { itemPriorityOf(it) }

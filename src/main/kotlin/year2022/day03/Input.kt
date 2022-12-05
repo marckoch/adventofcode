@@ -1,6 +1,6 @@
 package year2022.day03
 
-const val SAMPLE_INPUT = """vJrwpWtwJgWrhcsFMMfFFhFp
+const val SAMPLE = """vJrwpWtwJgWrhcsFMMfFFhFp
 jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
 PmmdzqPrVvPwwTWBwg
 wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn

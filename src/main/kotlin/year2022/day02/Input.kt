@@ -2501,6 +2501,6 @@ C Y
 C Z
 C Y"""
 
-const val TEST_INPUT = """A Y
+const val SAMPLE = """A Y
 B X
 C Z"""

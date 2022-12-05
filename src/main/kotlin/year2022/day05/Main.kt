@@ -2,11 +2,9 @@ package year2022.day05
 
 fun main() {
     solve(SampleInput(), Part1::moveCrates)
-    solve(SampleInput(), Part2::moveCrates)
-
-    // VGBBJCRMN
     solve(RealInput(), Part1::moveCrates)
-    // LBBVJBRMH
+
+    solve(SampleInput(), Part2::moveCrates)
     solve(RealInput(), Part2::moveCrates)
 }
 
