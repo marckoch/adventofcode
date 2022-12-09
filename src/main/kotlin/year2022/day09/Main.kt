@@ -3,12 +3,13 @@ package year2022.day09
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.sign
 
 fun main() {
-//    part1(SAMPLE)
-//    part1(INPUT)
+    part1(SAMPLE)
+    part1(INPUT)
 
-    part2(SAMPLE)
+//    part2(SAMPLE)
 //    part2(INPUT) // 5447 too high
 }
 
@@ -28,17 +29,30 @@ fun part1(input: String) {
         val direction = Dir.valueOf(s1)
         val numberOfSteps = s2.toInt()
 
+//        println(it)
+
         repeat(numberOfSteps) {
-            val oldHeadPos = headPos
-            headPos = move(direction, oldHeadPos)
-            if (nextShouldFollow(headPos, tailPos)) {
-                tailPos = oldHeadPos
-                tailVisits.add(tailPos)
-            }
+            headPos = moveHead(direction, headPos)
+            tailPos = moveNextSegment(headPos, tailPos)
+            tailVisits.add(tailPos)
             //print(headPos, tailPos)
         }
     }
     println("part1: ${tailVisits.size}")
+}
+
+fun moveNextSegment(head: Pos, tail: Pos): Pos {
+    val dX = head.first - tail.first
+    val dY = head.second - tail.second
+    if (abs(dX) > 1) {
+        return Pos(tail.first + dX.sign, head.second)
+    }
+    if (abs(dY) > 1) {
+        return Pos(head.first, tail.second + dY.sign)
+    }
+
+    // don't move
+    return tail
 }
 
 fun part2(input: String) {
@@ -56,7 +70,7 @@ fun part2(input: String) {
 
         repeat(numberOfSteps) {
             var oldHeadPos = segments[0]
-            segments[0] = move(direction, oldHeadPos)
+            segments[0] = moveHead(direction, oldHeadPos)
 
             for (i in (0..segments.lastIndex).windowed(2)) {
                 val h = i[0]
@@ -86,7 +100,7 @@ fun nextShouldFollow(head: Pos, tail: Pos): Boolean {
     return false
 }
 
-fun move(dir: Dir, x: Pos): Pos {
+fun moveHead(dir: Dir, x: Pos): Pos {
     return when (dir) {
         Dir.U -> moveUp(x)
         Dir.D -> moveDown(x)
@@ -135,8 +149,7 @@ private fun print(segments: List<Pos>) {
             val s = segments.withIndex().firstOrNull { (index, pair) -> pair.first == x && pair.second == y }
             if (s != null) {
                 if (s.index == 0) "H" else s.index.toString()
-            }
-            else {
+            } else {
                 if (x == 0 && y == 0) "s" else "."
             }
         }
