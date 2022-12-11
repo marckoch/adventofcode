@@ -43,7 +43,7 @@ fun round(monkeys: List<Monkey>) {
 fun getInputForMonkeys(input: String): List<List<String>> {
     return input.lines().fold(mutableListOf<MutableList<String>>()) { list, line ->
         if (line.isEmpty()) {
-            list.add(mutableListOf<String>())
+            list.add(mutableListOf())
         } else {
             if (list.isEmpty()) list.add(mutableListOf())
             list.last().add(line.trim())
@@ -96,7 +96,6 @@ class Monkey(private val id: Int, var items: ArrayDeque<Long>, private val rules
 interface Rules {
     fun getOperationForMonkey(id: Int): (Long) -> Long
     fun getTest(id: Int): (Long) -> Int
-
     fun getModuloFactor(): Int
 }
 
