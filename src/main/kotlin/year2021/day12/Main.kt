@@ -50,10 +50,10 @@ fun dfs(g: Map<String, List<String>>, from: String, to: String): List<List<Strin
 
 // https://www.baeldung.com/cs/simple-paths-between-two-vertices
 fun dfs(g: Map<String, List<String>>, from: String, to: String, currentPath: ArrayDeque<String>, paths: MutableList<List<String>>, visited: MutableList<String>) {
-    val fromIsSmallCave = from.all { it in ('a'..'z') }
-    if (visited.contains(from)) {
+    if (visitForbidden(visited, from)) {
         return
     }
+    val fromIsSmallCave = from.all { it in ('a'..'z') }
     if (fromIsSmallCave)
         visited.add(from)
     currentPath.addLast(from)
@@ -72,4 +72,8 @@ fun dfs(g: Map<String, List<String>>, from: String, to: String, currentPath: Arr
     if (fromIsSmallCave)
         visited.remove(from)
     currentPath.removeLast()
+}
+
+fun visitForbidden(visited: List<String>, from: String): Boolean {
+    return visited.contains(from)
 }
