@@ -1,13 +1,20 @@
 package year2021.day12
 
 fun main() {
-    part1(SAMPLE1)
-    part1(SAMPLE2)
-    part1(SAMPLE3)
-    part1(INPUT)
+    println("part1:")
+    solve(SAMPLE1, ::isVisitForbiddenPart1)
+    solve(SAMPLE2, ::isVisitForbiddenPart1)
+    solve(SAMPLE3, ::isVisitForbiddenPart1)
+    solve(INPUT, ::isVisitForbiddenPart1)
+
+    println("part2:")
+    solve(SAMPLE1, ::isVisitForbiddenPart2)
+    solve(SAMPLE2, ::isVisitForbiddenPart2)
+    solve(SAMPLE3, ::isVisitForbiddenPart2)
+    solve(INPUT, ::isVisitForbiddenPart2)
 }
 
-fun part1(input: String) {
+fun solve(input: String, isVisitForbidden: (List<String>, String) -> Boolean) {
     val connections = input.lines().map {
         val (from, to) = "(\\w*)-(\\w*)".toRegex().find(it)!!.destructured
         Pair(from, to)
@@ -15,7 +22,7 @@ fun part1(input: String) {
 
     val graph = buildGraph(connections)
 
-    val paths = dfs(graph, "start", "end")
+    val paths = dfs(graph, "start", "end", isVisitForbidden)
 //    paths.forEach { println(it) }
     println(paths.size)
 }
@@ -41,39 +48,71 @@ fun buildGraph(connections: List<Pair<String, String>>): Map<String, List<String
     }
 }
 
-fun dfs(g: Map<String, List<String>>, from: String, to: String): List<List<String>> {
+fun dfs(
+    g: Map<String, List<String>>,
+    from: String,
+    to: String,
+    isVisitForbidden: (List<String>, String) -> Boolean
+): List<List<String>> {
     val paths = mutableListOf<List<String>>()
     val visited = mutableListOf<String>()
-    dfs(g, from, to, ArrayDeque(), paths, visited)
+    dfs(g, from, to, ArrayDeque(), paths, visited, isVisitForbidden)
     return paths
 }
 
 // https://www.baeldung.com/cs/simple-paths-between-two-vertices
-fun dfs(g: Map<String, List<String>>, from: String, to: String, currentPath: ArrayDeque<String>, paths: MutableList<List<String>>, visited: MutableList<String>) {
-    if (visitForbidden(visited, from)) {
+fun dfs(
+    g: Map<String, List<String>>, from: String, to: String,
+    currentPath: ArrayDeque<String>,
+    paths: MutableList<List<String>>,
+    smallCavesVisited: MutableList<String>,
+    isVisitForbidden: (List<String>, String) -> Boolean
+) {
+    if (isVisitForbidden(smallCavesVisited, from)) {
         return
     }
+
     val fromIsSmallCave = from.all { it in ('a'..'z') }
     if (fromIsSmallCave)
-        visited.add(from)
+        smallCavesVisited.add(from)
     currentPath.addLast(from)
+
     if (from == to) {
         paths.add(currentPath.toMutableList()) // make copy by calling toMutableList
         if (fromIsSmallCave)
-            visited.remove(from)
+            smallCavesVisited.remove(from)
         currentPath.removeLast()
         return
     }
 
     for (next in g[from]!!.sorted()) {
-        dfs(g, next, to, currentPath, paths, visited)
+        dfs(g, next, to, currentPath, paths, smallCavesVisited, isVisitForbidden)
     }
 
     if (fromIsSmallCave)
-        visited.remove(from)
+        smallCavesVisited.remove(from)
     currentPath.removeLast()
 }
 
-fun visitForbidden(visited: List<String>, from: String): Boolean {
-    return visited.contains(from)
+// part1: only one visit allowed
+fun isVisitForbiddenPart1(smallCavesVisited: List<String>, from: String): Boolean {
+    return smallCavesVisited.contains(from)
+}
+
+fun isVisitForbiddenPart2(smallCavesVisited: List<String>, from: String): Boolean {
+    // never visit start again
+    if (from == "start" && smallCavesVisited.contains("start")) return true
+
+    val otherHasCount2 = smallCavesVisited.filter { it != from }
+        .groupingBy { it }
+        .eachCount()
+        .any { entry -> entry.value == 2 }
+
+    if (otherHasCount2) {
+        // if other has already been visited twice, I can visit once at most
+        return smallCavesVisited.count { it == from } > 0
+    } else {
+        // if no other has been visited twice, I can visit twice
+        return smallCavesVisited.count { it == from } > 1
+    }
 }
