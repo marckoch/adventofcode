@@ -8,6 +8,7 @@ fun main() {
     part2(INPUT)
 }
 
+// read lines in chunks seperated by blank line
 // aggregate the lines until blank line is reached, then start next elf
 // for the sample on web page this would produce a list: 6000, 4000, 11000, 24000, ...
 fun getListOfTotalCalories(input: String): List<Int> {
