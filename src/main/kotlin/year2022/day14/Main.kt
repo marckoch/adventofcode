@@ -4,6 +4,8 @@ import kotlin.math.max
 import kotlin.math.min
 
 fun main() {
+    // all in all very ugly solution :-(
+    // very slow in part 2 but gets the correct result after a few minutes
     part1(SAMPLE)
     part1(INPUT)
 }
@@ -13,40 +15,46 @@ fun part1(input: String) {
         .map { s -> s.split(" -> ").toList() }
         .map { strings -> buildWall(strings) }
 
-    val allPoints = walls.flatten()
+    var allPoints = walls.flatten()
 
-    var sand = emptyList<Point>()
+    // part2:
+    val maxRow = allPoints.maxOfOrNull { it.second }!! + 2
+    allPoints = allPoints + (500 - maxRow..500 + maxRow).map { c -> Pair(c, maxRow) }
+
+    val sand = mutableSetOf<Point>()
 
     while (true) {
-        val newSand = dropOnePiece(allPoints, sand)
-        if (newSand != sand) {
-            sand = newSand
-        } else break
+        val countSand = sand.size
+        dropOnePiece(allPoints, sand)
+        if (countSand == sand.size) // no sand has been added, we are done
+            break
     }
 
     print(allPoints, sand)
     println("part1: " + sand.size)
 }
 
+// Markers to avoid null stuff
 val StopPoint = Point(Int.MAX_VALUE, Int.MAX_VALUE)
 val FallOffPoint = Point(Int.MAX_VALUE, Int.MIN_VALUE)
 
-fun dropOnePiece(allPoints: List<Point>, sand: List<Point>): List<Point> {
+fun dropOnePiece(allPoints: List<Point>, sand: MutableSet<Point>): MutableSet<Point> {
     var p: Point = Pair(500, 0)
     while (true) {
         val nextPos = nextStep(p, allPoints, sand)
         if (nextPos == FallOffPoint)
             return sand
         if (nextPos == StopPoint) {
-            return sand + p
+            sand.add(p)
+            return sand
         } else {
             p = nextPos
         }
     }
 }
 
-fun nextStep(p: Point, allPoints: List<Point>, sand: List<Point>): Point {
-    if (p.second > allPoints.maxOfOrNull { it.second }!!) // we fell off
+fun nextStep(p: Point, allPoints: List<Point>, sand: Set<Point>): Point {
+    if (p.second > allPoints.maxOfOrNull { it.second }!! + 2) // we fell off
         return FallOffPoint
 
     val down = Pair(p.first, p.second + 1)
@@ -60,7 +68,6 @@ fun nextStep(p: Point, allPoints: List<Point>, sand: List<Point>): Point {
 }
 
 fun buildWall(points: List<String>): List<Point> {
-    println(points)
     return points.map { s ->
         val (x, y) = s.split(",")
         Pair(x.toInt(), y.toInt())
@@ -82,14 +89,13 @@ fun buildWall(points: List<String>): List<Point> {
         .toSet().toList()
 }
 
-fun print(allPoints: List<Point>, sand: List<Point>) {
+fun print(allPoints: List<Point>, sand: Set<Point>) {
     val maxRow = allPoints.maxOfOrNull { p -> p.second }!!
     val minCol = allPoints.minOfOrNull { p -> p.first }!!
     val maxCol = allPoints.maxOfOrNull { p -> p.first }!!
-    println("$minCol..$maxCol 0..$maxRow")
 
-    (0..maxRow).forEach {
-        r -> (minCol..maxCol).forEach { c ->
+    (0..maxRow).forEach { r ->
+        (minCol..maxCol).forEach { c ->
             if (allPoints.contains(Pair(c, r)))
                 print("#")
             else if (sand.contains(Pair(c, r)))
