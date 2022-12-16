@@ -1,11 +1,16 @@
 package year2022.day12
 
-fun main() {
-    part1(SAMPLE)
-    part1(INPUT)
+import java.util.*
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTime
 
-    part2(SAMPLE)
-    part2(INPUT)
+@OptIn(ExperimentalTime::class)
+fun main() {
+    measureTime {  part1(SAMPLE) }.let { println(it) }
+    measureTime {  part1(INPUT) }.let { println(it) }
+
+    measureTime {  part2(SAMPLE) }.let { println(it) }
+    measureTime {  part2(INPUT) }.let { println(it) }
 }
 
 fun part1(input: String) {
@@ -43,30 +48,30 @@ fun part2(input: String) {
 // https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm
 // https://www.atomiccommits.io/dijkstras-algorithm-in-kotlin
 fun dijkstra(map: List<String>, start: Point, validNeighborElevations: (Char) -> CharRange): MutableMap<Point, Int> {
-    val visited = mutableSetOf<Point>()
-    val costMap = allPoints(map).associateWith { Int.MAX_VALUE / 2 }.toMutableMap()
+    val costMap = allPoints(map).associateWith { Int.MAX_VALUE }.toMutableMap()
     costMap[start] = 0
+
+    val nextPoints = PriorityQueue<Pair<Point, Int>> { o1, o2 -> o1.second.compareTo(o2.second) }
+    nextPoints.add(Pair(start, 0))
 
     val path = emptyMap<Point, Point>().toMutableMap()
 
-    val allPoints = costMap.size
-
-    while (allPoints != visited.size) {
+    val visited = mutableSetOf<Point>()
+    while (nextPoints.isNotEmpty()) {
         // find point with minimal cost
-        val currentPoint = costMap
-            .filter { !visited.contains(it.key) }
-            .minBy { it.value }
-            .key
+        val (point, cost) = nextPoints.poll()
+        if (visited.contains(point)) continue
 
-        for (n in findNeighbors(map, currentPoint, validNeighborElevations)) {
-            val newCost = costMap[currentPoint]!! + 1 // cost to next field is just 1 (1 step)
+        for (n in findNeighbors(map, point, validNeighborElevations)) {
+            val newCost = cost + 1 // cost to next field is just 1 (1 step)
             if (newCost < costMap[n]!!) {
                 costMap[n] = newCost
-                path[n] = currentPoint
+                path[n] = point
             }
+            nextPoints.add(Pair(n, costMap[n]!!))
         }
 
-        visited.add(currentPoint)
+        visited.add(point)
     }
 //    println(path)
     return costMap
