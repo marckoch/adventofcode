@@ -5,6 +5,9 @@ import kotlin.math.sqrt
 fun main() {
     part1(20..30, -10..-5)
     part1(257..286, -101..-57)
+
+    part2(20..30, -10..-5)
+    part2(257..286, -101..-57)
 }
 
 fun part1(targetX: IntRange, targetY: IntRange) {
@@ -21,6 +24,21 @@ fun part1(targetX: IntRange, targetY: IntRange) {
         .maxBy { probes -> probes.maxOf { p -> p.y } }
         .also { println(it) }
         .maxOf { p -> p.y }
+        .let { println(it) }
+}
+
+fun part2(targetX: IntRange, targetY: IntRange) {
+    val minVX = sqrt(targetX.min().toDouble() * 2).toInt()
+    val maxVX = targetX.max()
+    val minVY = targetY.min()
+    val maxVY = 200 // todo how to find a good max?
+
+    (minVX..maxVX).flatMap { vx ->
+        (minVY..maxVY).map { vy ->
+            path(vx, vy, targetX, targetY)
+        }
+    }.filter { probes -> probes.any { p -> p.x in targetX && p.y in targetY } }
+        .count()
         .let { println(it) }
 }
 
