@@ -1,20 +1,24 @@
 package year2022.day23
 
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTime
+
+@OptIn(ExperimentalTime::class)
 fun main() {
-    part1(SAMPLE_SMALL)
-    part1(SAMPLE)
-    part1(INPUT)
+    measureTime { part1(SAMPLE_SMALL) }.let { println(it) }
+    measureTime { part1(SAMPLE) }.let { println(it) }
+    measureTime { part1(INPUT) }.let { println(it) }
+
+    measureTime { part2(SAMPLE_SMALL) }.let { println(it) }
+    measureTime { part2(SAMPLE) }.let { println(it) }
+    measureTime { part2(INPUT) }.let { println(it) }
 }
 
 // cycle through list
 private fun dircycle() = iterator { while (true) yieldAll(Direction.values().iterator()) }
 
 fun part1(input: String) {
-    var elves = input.lines().withIndex().flatMap { (rowIndex, line) ->
-        line.withIndex().mapNotNull { (colIndex, c) ->
-            if (c == '#') Elf(rowIndex, colIndex) else null
-        }
-    }
+    var elves = parse(input)
     //elves.let { println(it) }
 
     //print(elves)
@@ -25,6 +29,27 @@ fun part1(input: String) {
         //print(elves)
     }
     countEmptyTiles(elves).let { println("part1: $it") }
+}
+
+fun part2(input: String) {
+    var elves = parse(input)
+    //elves.let { println(it) }
+
+    //print(elves)
+
+    var round = 0
+    while (true) {
+        val moves = dircycle().asSequence().drop(round).take(4).toList()
+        val newElves = move(elves, moves)
+
+        if (newElves == elves) {
+            println("no elf moved in round ${round + 1}!")
+            return
+        } else
+            elves = newElves
+        //print(elves)
+        round++
+    }
 }
 
 fun move(elves: List<Elf>, directions: List<Direction>): List<Elf> {
@@ -94,6 +119,14 @@ fun print(elves: List<Elf>) {
                 print(".")
         }
         println()
+    }
+}
+
+fun parse(input: String): List<Elf> {
+    return input.lines().withIndex().flatMap { (rowIndex, line) ->
+        line.withIndex().mapNotNull { (colIndex, c) ->
+            if (c == '#') Elf(rowIndex, colIndex) else null
+        }
     }
 }
 
