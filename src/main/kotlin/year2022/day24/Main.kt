@@ -5,7 +5,7 @@ import java.util.PriorityQueue
 fun main() {
     part1(SAMPLE)
     part1(SAMPLE2)
-//    part1(INPUT)
+    part1(INPUT)
 }
 
 fun part1(input: String) {
@@ -18,46 +18,51 @@ fun part1(input: String) {
     val board = Board(maxRow, maxCol, start, finish)
 
     println("initial state:")
-    print(board, blizzards, start)
+    board.print(blizzards, start)
 
-    val q = PriorityQueue<Pair<Point, List<Blizzard>>> { p1, p2 -> p2.first.row - p1.first.row + p2.first.col - p1.first.col }
+    val time = solve(board, blizzards, start, finish, 0)
+    println("part1: $time")
+    val time2 = solve(board, blizzards, finish, start, time)
+    val time3 = solve(board, blizzards, start, finish, time2)
+    println("part2: $time3")
+}
 
-    var b = blizzards
-    var currentPos = start
-    var round = 0
-    while (true) {
-        b = moveBlizzards(board, b)
-
-        val free = findFreeFields(board, b, currentPos)
-        if (free.contains(finish)) {
-            println("Minute ${round++ + 1}:")
-            currentPos = finish
-            print(board, b, currentPos)
-            break
+fun solve(board: Board, blizzards: List<Blizzard>, start: Point, finish: Point, startTime: Int): Int {
+    // this is basically an iterative BFS
+    val seen = mutableSetOf<State>()
+    // because the edges are moving (time dependent) we also have to store the time in state
+    val q = PriorityQueue(compareBy(State::time))
+    q.add(State(startTime, start))
+    while (q.isNotEmpty()) {
+        val (time, currentPos) = q.poll()
+        if (currentPos == finish) {
+            println("Minute $time:")
+            board.print(moveBlizzards(board, blizzards, time), currentPos)
+            return time
         }
-        free.map { Pair(it, b) }.forEach { q.add(it) }
-        if (free.isNotEmpty()) {
-            val (p, blizz) = q.poll()
-            currentPos = p
-            b = blizz
-        }
 
-        println("Minute ${round++ + 1}:")
-        //print(board, b, currentPos)
+        val movedBlizzards = moveBlizzards(board, blizzards, time + 1)
+        findFreeFields(board, movedBlizzards, currentPos)
+            .map { pos -> State(time + 1, pos) }.forEach { state ->
+                seen.add(state) && q.add(state) // add to queue only if not already seen
+            }
     }
+    throw IllegalStateException("computer says no!")
 }
 
 fun findFreeFields(board: Board, blizzards: List<Blizzard>, p: Point): List<Point> {
-    val blizPoints = blizzards.map { b -> b.point }
-//    println(blizPoints)
-    return listOf(Point(1,0), Point(-1,0), Point(0,-1), Point(0,1)).map { dp ->
-            Point(p.row + dp.row, p.col + dp.col)
+    val blizzardPoints = blizzards.map { b -> b.point }
+    return listOf(
+        Point(0, 0), // staying in place is a valid option!
+        Point(1, 0), Point(-1, 0),
+        Point(0, -1), Point(0, 1)
+    ).map { (dRow, dCol) ->
+        Point(p.row + dRow, p.col + dCol)
     }
-//        .also { println(it) }
-    .filter { it.row in (1 until board.maxRow) && it.col in (1 until board.maxCol) || it == board.finish}
-//        .also { println(it) }
-    .filter { point -> !blizPoints.contains(point) }
-//        .also { println(it) }
+        .filterNot { blizzardPoints.contains(it) }
+        .filter { it == board.start || it == board.finish ||
+                    (it.row in board.innerRows && it.col in board.innerCols)
+        }
 }
 
 fun parseBlizzards(input: String): List<Blizzard> {
@@ -71,12 +76,12 @@ fun parseBlizzards(input: String): List<Blizzard> {
     }
 }
 
-fun moveBlizzards(board: Board, blizzards: List<Blizzard>): List<Blizzard> {
+// take given blizzards and move each one 'steps' steps ahead, while obeying the boundaries
+fun moveBlizzards(board: Board, blizzards: List<Blizzard>, steps: Int): List<Blizzard> {
     return blizzards.map { b ->
-        val newRow = (b.point.row + b.dirAsDelta().row)
-            .let { if (it == board.maxRow) 1 else if (it == 0) board.maxRow - 1 else it }
-        val newCol = (b.point.col + b.dirAsDelta().col)
-            .let { if (it == board.maxCol) 1 else if (it == 0) board.maxCol - 1 else it }
+        // like a coordinate transformation: (y-y0) = (x-x0) + Z(t)
+        val newRow = (b.point.row - board.rowOffset + (steps * b.dirAsDelta().row)).mod(board.height) + board.rowOffset
+        val newCol = (b.point.col - board.colOffset + (steps * b.dirAsDelta().col)).mod(board.width) + board.colOffset
 
         Blizzard(Point(newRow, newCol), b.dir)
     }
@@ -94,32 +99,40 @@ data class Blizzard(val point: Point, val dir: Char) {
     }
 }
 
-data class Board(val maxRow: Int, val maxCol: Int, val start: Point, val finish: Point)
+data class Board(val maxRow: Int, val maxCol: Int, val start: Point, val finish: Point) {
+    val rowOffset = 1
+    val colOffset = 1
+    val width = maxCol - 1
+    val height = maxRow - 1
+    val innerRows = (1 until maxRow)
+    val innerCols = (1 until maxCol)
 
-fun print(board: Board, blizzards: List<Blizzard>, exp: Point) {
-    for (r in 0..board.maxRow) {
-        for (c in 0..board.maxCol) {
-            if (r == exp.row && c == exp.col) {
-                print('E')
-            } else if (r == board.start.row && c == board.start.col) {
-                print('.')
-            } else if (r == board.finish.row && c == board.finish.col) {
-                print('.')
-            } else if (r == 0 || r == board.maxRow || c == 0 || c == board.maxCol) {
-                print('#')
-            } else {
-                val blizzardsInField = blizzards.filter { it.point.row == r && it.point.col == c }
-                if (blizzardsInField.size > 1) {
-                    print(blizzardsInField.size)
-                } else if (blizzardsInField.size == 1) {
-                    print(blizzardsInField.first().dir)
-                } else {
+    fun print(blizzards: List<Blizzard>, exp: Point) {
+        for (r in 0..maxRow) {
+            for (c in 0..maxCol) {
+                if (r == exp.row && c == exp.col) {
+                    print('E')
+                } else if (r == start.row && c == start.col) {
                     print('.')
+                } else if (r == finish.row && c == finish.col) {
+                    print('.')
+                } else if (r == 0 || r == maxRow || c == 0 || c == maxCol) {
+                    print('#')
+                } else {
+                    val blizzardsInField = blizzards.filter { it.point.row == r && it.point.col == c }
+                    if (blizzardsInField.size > 1) {
+                        print(blizzardsInField.size)
+                    } else if (blizzardsInField.size == 1) {
+                        print(blizzardsInField.first().dir)
+                    } else {
+                        print('.')
+                    }
                 }
             }
+            println()
         }
-        println()
     }
 }
 
 data class Point(val row: Int, val col: Int)
+data class State(val time: Int, val position: Point)
