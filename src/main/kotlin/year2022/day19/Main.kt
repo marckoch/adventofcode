@@ -18,21 +18,23 @@ fun part1(input: String) {
 }
 
 fun calc(bp: Blueprint) {
+    val initial = State(24, Resources(0, 0, 0, 0), Robots(1, 0, 0, 0))
 
-    val initial = State(10, Resources(0, 0, 0, 0), Robots(1, 0, 0, 0))
     val queue = ArrayDeque<State>()
     queue.addLast(initial)
+
     val seenStates = mutableSetOf<State>()
     var maxGeode = 0
 
     while (queue.isNotEmpty()) {
         val state = queue.removeFirst()
-
-        if (seenStates.contains(state))
-            continue
-        seenStates.add(state)
-
         val resources = state.resources
+
+        if (state.time == 0) {
+            //println(state)
+            maxGeode = max(maxGeode, resources.geode)
+            continue
+        }
 
         // reduce resources for robot builds
         // collect new resources
@@ -40,28 +42,27 @@ fun calc(bp: Blueprint) {
 
         // println(state)
 
-        if (state.time == 0) {
-            println(state)
-            maxGeode = max(maxGeode, resources.geode)
-            continue
-        }
-
         // we do not buy anything, we just wait and collect resources
-        queue.addLast(State(state.time - 1, resources.collectResources(state.robots), state.robots))
+        State(state.time - 1, resources.collectResources(state.robots), state.robots)
+            .let { seenStates.add(it) && queue.add(it) }
 
         // if prioritize the expensive robots first
         if (resources.cover(bp.geodeRobot)) {
             // we buy one geode robot
-            queue.addLast(State(state.time - 1, resources.spendOn(bp.geodeRobot).collectResources(state.robots), state.robots.incGeodeRobots()))
+            State(state.time - 1, resources.spendOn(bp.geodeRobot).collectResources(state.robots), state.robots.incGeodeRobots())
+                .let { seenStates.add(it) && queue.add(it) }
         } else if (resources.cover(bp.obsidianRobot)) {
             // we buy one obsidian robot
-            queue.addLast(State(state.time - 1, resources.spendOn(bp.obsidianRobot).collectResources(state.robots), state.robots.incObsidianRobots()))
+            State(state.time - 1, resources.spendOn(bp.obsidianRobot).collectResources(state.robots), state.robots.incObsidianRobots())
+                .let { seenStates.add(it) && queue.add(it) }
         } else if (resources.cover(bp.clayRobot)) {
             // we buy one clay robot
-            queue.addLast(State(state.time - 1, resources.spendOn(bp.clayRobot).collectResources(state.robots), state.robots.incClayRobots()))
+            State(state.time - 1, resources.spendOn(bp.clayRobot).collectResources(state.robots), state.robots.incClayRobots())
+                .let { seenStates.add(it) && queue.add(it) }
         } else if (resources.cover(bp.oreRobot)) {
             // we buy one ore robot
-            queue.addLast(State(state.time - 1, resources.spendOn(bp.oreRobot).collectResources(state.robots), state.robots.incOreRobots()))
+            State(state.time - 1, resources.spendOn(bp.oreRobot).collectResources(state.robots), state.robots.incOreRobots())
+                .let { seenStates.add(it) && queue.add(it) }
         }
     }
 
