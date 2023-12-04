@@ -1,19 +1,19 @@
 package year2023.day01
 
 fun main() {
-    part1(SAMPLE)
-    part1(INPUT)
+    part1(SAMPLE).let { println(it) } // 142
+    part1(INPUT).let { println(it) }  // 54390
 
-    part2(SAMPLE2)
-    part2(INPUT)
+    part2(SAMPLE2).let { println(it) } // 281
+    part2(INPUT).let { println(it) }   // 54277
 }
 
-fun part1(input: String) {
-    input.lines().sumOf { extractNumber1(it) }.let { println(it) }
+fun part1(input: String): Int {
+    return input.lines().sumOf { extractNumber1(it) }
 }
 
-fun part2(input: String) {
-    input.lines().sumOf { extractNumber2(it) }.let { println(it) }
+fun part2(input: String): Int {
+    return input.lines().sumOf { extractNumber2(it) }
 }
 
 fun extractNumber1(line: String): Int {

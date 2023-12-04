@@ -3,30 +3,24 @@ package year2023.day02
 val LINE_PATTERN = """Game (\d*): (.*)""".toRegex()
 
 fun main() {
-    part1(SAMPLE, 12, 13, 14)
-    part1(INPUT, 12, 13, 14)
+    part1(SAMPLE, 12, 13, 14).let { println(it) } // 8
+    part1(INPUT, 12, 13, 14).let { println(it) }  // 2563
 
-    part2(SAMPLE)
-    part2(INPUT)
+    part2(SAMPLE).let { println(it) } // 2286
+    part2(INPUT).let { println(it) }  // 70768
 }
 
-fun part1(input: String, maxRed: Int, maxGreen: Int, maxBlue: Int) {
-    input.lines()
+fun part1(input: String, maxRed: Int, maxGreen: Int, maxBlue: Int): Int {
+    return input.lines()
         .map { line -> Game.fromString(line) }
         .filter { game -> game.isPossible(maxRed, maxGreen, maxBlue) }
         .sumOf { game -> game.number }
-        .let {
-            sum -> println(sum)
-        }
 }
 
-fun part2(input: String) {
-    input.lines()
+fun part2(input: String): Int {
+    return input.lines()
         .map { line -> Game.fromString(line) }
         .sumOf { game -> game.power() }
-        .let {
-            sum -> println(sum)
-        }
 }
 
 data class Game(val number: Int, val cubeSets: List<CubeSet>) {

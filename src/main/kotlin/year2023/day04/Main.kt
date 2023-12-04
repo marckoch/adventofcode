@@ -5,15 +5,15 @@ import kotlin.math.pow
 val LINE_PATTERN = """Card ([\d ]+): ([\d ]+) \| ([\d ]+)""".toRegex()
 
 fun main() {
-    part1(SAMPLE) // 13
-    part1(INPUT)  // 23441
+    part1(SAMPLE).let { println(it) } // 13
+    part1(INPUT).let { println(it) }  // 23441
 
-    part2(SAMPLE) // 30
-    part2(INPUT)  // 5923918
+    part2(SAMPLE).let { println(it) } // 30
+    part2(INPUT).let { println(it) }  // 5923918
 }
 
-fun part1(input: String) {
-    input.lines()
+fun part1(input: String): Int {
+    return input.lines()
         .map { line ->
             val (g, w, n) = LINE_PATTERN.matchEntire(line)!!.destructured
             // println("g=[$g] w=[$w] n=[$n]")
@@ -32,10 +32,9 @@ fun part1(input: String) {
                 0
         }
         .sumOf { it }
-        .let { println(it) }
 }
 
-fun part2(input: String) {
+fun part2(input: String): Int {
     val noOfCards = input.lines().count()
     val cards = Array(noOfCards) { 1 } // we start with one of each card
 
@@ -61,7 +60,7 @@ fun part2(input: String) {
             // println(cards.toList())
         }
 
-    println(cards.sum())
+    return cards.sum()
 }
 
 fun extractNumberSet(s: String): Set<Int> {

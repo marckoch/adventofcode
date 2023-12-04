@@ -1,14 +1,14 @@
 package year2023.day03
 
 fun main() {
-    part1(SAMPLE) // 4361
-    part1(INPUT)  // 527446
+    part1(SAMPLE).let { println(it) } // 4361
+    part1(INPUT).let { println(it) }  // 527446
 
-    part2(SAMPLE) // 467835
-    part2(INPUT)  // 73201705
+    part2(SAMPLE).let { println(it) } // 467835
+    part2(INPUT).let { println(it) }  // 73201705
 }
 
-fun part1(input: String) {
+fun part1(input: String): Int {
     val (numbers, symbols) = extract(input)
 
 //    numbers.forEach { println(it) }
@@ -23,15 +23,14 @@ fun part1(input: String) {
 //    println("adjacent: ${adjacent.size}")
 //    adjacent.forEach { println(it) }
 
-    adjacent.sumOf { it.number() }.let { println(it) }
+    return adjacent.sumOf { it.number() }
 }
 
-fun part2(input: String) {
+fun part2(input: String): Int {
     val (numbers, symbols) = extract(input)
 
-    symbols.filter { it.char == '*' }// potentially gears
+    return symbols.filter { it.char == '*' }// potentially gears
         .sumOf { gear -> gearPower(gear, numbers) }
-        .let { println(it) }
 }
 
 fun gearPower(gear: Symbol, allNumbers: Set<PartNumber>): Int {
@@ -90,7 +89,7 @@ fun extract(input: String): Pair<Set<PartNumber>, Set<Symbol>> {
         }
         // at the end of the line: finish current number and add it to numbers list
         if (currentNumber != null) {
-            currentNumber!!.end = Point(x - 1, y)
+            currentNumber!!.end = Point(x, y)
             numbers.add(currentNumber!!)
             currentNumber = null
         }
