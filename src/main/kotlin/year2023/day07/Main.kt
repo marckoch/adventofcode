@@ -9,40 +9,41 @@ fun main() {
 }
 
 fun part1(input: String): Int {
-    val c = input.lines()
-        .asSequence()
-        .drop(1) // first line is empty
-        .map { line -> Hand1(line) }
-        .sortedBy { it }
-        .withIndex()
-        .map { IndexedValue(it.index + 1, it.value) }
-        .toList()
-//         .forEach { println(it) }
-
-    return c.sumOf { it.index * it.value.bid }
+    return totalWinnings(input) { line -> Hand1(line) }
 }
 
 fun part2(input: String): Int {
-    val c = input.lines()
+    return totalWinnings(input) { line -> Hand2(line) }
+}
+
+fun totalWinnings(input: String, handGenerator: (String) -> Hand): Int {
+    val rankedCards = input.lines()
         .asSequence()
         .drop(1) // first line is empty
-        .map { line -> Hand2(line) }
+        .map { line -> handGenerator(line) }
         .sortedBy { it }
         .withIndex()
         .map { IndexedValue(it.index + 1, it.value) }
         .toList()
 //         .forEach { println(it) }
 
-    return c.sumOf { it.index * it.value.bid }
+    return rankedCards.sumOf { it.index * it.value.bid }
 }
 
-class Hand1(line: String): Hand(line), Comparable<Hand1> {
+class Hand1(line: String): Hand(line), Comparable<Hand> {
 
     override fun strength(card: Char): Int {
         return "23456789TJQKA".indexOf(card)
     }
 
-    override fun compareTo(other: Hand1): Int {
+    override fun compareTo(other: Hand): Int {
+        if (other is Hand1)
+            return this.compareTo(other)
+        else
+            throw IllegalArgumentException("Can only compare Hand1 to Hand1")
+    }
+
+    private fun compareTo(other: Hand1): Int {
         // frequencies always look like this:
         // 5, 0, 0, 0, 0 five of a kind
         // 4, 1, 0, 0, 0 four of a kind
@@ -65,12 +66,19 @@ class Hand1(line: String): Hand(line), Comparable<Hand1> {
     }
 }
 
-class Hand2(line: String): Hand(line), Comparable<Hand2> {
+class Hand2(line: String): Hand(line), Comparable<Hand> {
     override fun strength(card: Char): Int {
-        return "J23456789TQKA".indexOf(card)
+        return "J23456789TQKA".indexOf(card) // here J is the weakest card
     }
 
-    override fun compareTo(other: Hand2): Int {
+    override fun compareTo(other: Hand): Int {
+        if (other is Hand2)
+            return this.compareTo(other)
+        else
+            throw IllegalArgumentException("Can only compare Hand2 to Hand2")
+    }
+
+    private fun compareTo(other: Hand2): Int {
         // frequencies always look like this:
         // 5, 0, 0, 0, 0 five of a kind
         // 4, 1, 0, 0, 0 four of a kind
@@ -91,51 +99,29 @@ class Hand2(line: String): Hand(line), Comparable<Hand2> {
             { hand: Hand2 -> strength(hand.cards[1]) },
             { hand: Hand2 -> strength(hand.cards[2]) },
             { hand: Hand2 -> strength(hand.cards[3]) },
-            { hand: Hand2 -> strength(hand.cards[4]) })
-            .compare(this, other)
+            { hand: Hand2 -> strength(hand.cards[4]) }).compare(this, other)
     }
 
     private fun promote(): Hand2 {
         if (!line.contains('J')) return this
 
-        val newHand = when {
-            type() == Type.FIVE_OF_A_KIND -> {
+        val newHand = when (type()) {
+            Type.FIVE_OF_A_KIND -> {
+                // only way to promote 5 J's is to replace with 5 A's
                 Hand2(line.replace("J", "A"))
             }
-            type() == Type.FOUR_OF_A_KIND -> {
+            Type.FOUR_OF_A_KIND, Type.FULL_HOUSE, Type.THREE_OF_A_KIND, Type.TWO_PAIR, Type.ONE_PAIR -> {
+                // if J is the highest card, replace with next highest card to form a higher type consisting of other card
+                // if J is the next highest card, replace with the highest card to form a higher type consisting of highest card
                 if (freq[0].key == 'J')
                     Hand2(line.replace("J", freq[1].key.toString()))
                 else
                     Hand2(line.replace("J", freq[0].key.toString()))
             }
-            type() == Type.FULL_HOUSE -> {
-                if (freq[0].key == 'J')
-                    Hand2(line.replace("J", freq[1].key.toString()))
-                else
-                    Hand2(line.replace("J", freq[0].key.toString()))
-            }
-            type() == Type.THREE_OF_A_KIND -> {
-                if (freq[0].key == 'J')
-                    Hand2(line.replace("J", freq[1].key.toString()))
-                else
-                    Hand2(line.replace("J", freq[0].key.toString()))
-            }
-            type() == Type.TWO_PAIR -> {
-                if (freq[0].key == 'J')
-                    Hand2(line.replace("J", freq[1].key.toString()))
-                else
-                    Hand2(line.replace("J", freq[0].key.toString()))
-            }
-            type() == Type.ONE_PAIR -> {
-                if (freq[0].key == 'J')
-                    Hand2(line.replace("J", freq[1].key.toString()))
-                else
-                    Hand2(line.replace("J", freq[0].key.toString()))
-            }
-            type() == Type.HIGH_CARD -> {
+            Type.HIGH_CARD -> {
+                // replace the single J with the highest card in the hand to form a one pair of highest card
                 Hand2(line.replace("J", freq[0].key.toString()))
             }
-            else -> this
         }
 //        if (newHand.line != line)
 //            println("promoting $line -> $newHand")
@@ -143,7 +129,7 @@ class Hand2(line: String): Hand(line), Comparable<Hand2> {
     }
 }
 
-abstract class Hand(val line: String) {
+abstract class Hand(val line: String): Comparable<Hand> {
     val freq: List<Map.Entry<Char, Int>>
     val bid: Int
     val cards: List<Char>
@@ -171,20 +157,14 @@ abstract class Hand(val line: String) {
         // 2, 2, 1, 0, 0 two pair
         // 2, 1, 1, 1, 0 one pair
         // 1, 1, 1, 1, 1 high card
-        return if (freq[0].value == 5) {
-            Type.FIVE_OF_A_KIND
-        } else if (freq[0].value == 4) {
-            Type.FOUR_OF_A_KIND
-        } else if (freq[0].value == 3 && freq[1].value == 2) {
-            Type.FULL_HOUSE
-        } else if (freq[0].value == 3) {
-            Type.THREE_OF_A_KIND
-        } else if (freq[0].value == 2 && freq[1].value == 2) {
-            Type.TWO_PAIR
-        } else if (freq[0].value == 2) {
-            Type.ONE_PAIR
-        } else {
-            Type.HIGH_CARD
+        return when {
+            freq[0].value == 5 -> Type.FIVE_OF_A_KIND
+            freq[0].value == 4 -> Type.FOUR_OF_A_KIND
+            freq[0].value == 3 && freq[1].value == 2 -> Type.FULL_HOUSE
+            freq[0].value == 3 -> Type.THREE_OF_A_KIND
+            freq[0].value == 2 && freq[1].value == 2 -> Type.TWO_PAIR
+            freq[0].value == 2 -> Type.ONE_PAIR
+            else -> Type.HIGH_CARD
         }
     }
 
