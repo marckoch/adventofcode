@@ -16,4 +16,13 @@ class Year2023Day07Test {
         assertThat(part1(INPUT)).isEqualTo(252656917)
     }
 
+    @Test
+    fun `part 2 samples`() {
+        assertThat(part2(SAMPLE)).isEqualTo(5905)
+    }
+
+    @Test
+    fun `part 2`() {
+        assertThat(part2(INPUT)).isEqualTo(253499763)
+    }
 }
