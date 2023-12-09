@@ -22,9 +22,9 @@ fun part1(input: String): Int {
 }
 
 data class Hand(val line: String): Comparable<Hand> {
-    val freq: List<Map.Entry<Char, Int>>
+    private val freq: List<Map.Entry<Char, Int>>
     val bid: Int
-    val cards: List<Char>
+    private val cards: List<Char>
 
     init {
         val (h, b) = line.split(" ")
@@ -36,11 +36,10 @@ data class Hand(val line: String): Comparable<Hand> {
             .sortedWith(
                 compareByDescending<Map.Entry<Char, Int>> { it.value }
                     .thenByDescending { strength(it.key) })
-
 //         println("$line -> $freq ${type()} $bid")
     }
 
-    fun strength(card: Char): Int {
+    private fun strength(card: Char): Int {
         return "23456789TJQKA".indexOf(card)
     }
 
@@ -53,59 +52,17 @@ data class Hand(val line: String): Comparable<Hand> {
         // 2, 2, 1, 0, 0 two pair
         // 2, 1, 1, 1, 0 one pair
         // 1, 1, 1, 1, 1 high card
-        // --> it is enough two compare the first 2 groups to determine hand strength
-        val countGroup1 = freq[0].value.compareTo(other.freq[0].value)
-        if (countGroup1 != 0) return countGroup1
-        val countGroup2 = freq[1].value.compareTo(other.freq[1].value)
-        if (countGroup2 != 0) return countGroup2
-
-        // after this we now we have two equally strong hands, so we need to compare the individual cards
-        val strengthCard1 = strength(cards[0]).compareTo(strength(other.cards[0]))
-        if (strengthCard1 != 0) return strengthCard1
-        val strengthCard2 = strength(cards[1]).compareTo(strength(other.cards[1]))
-        if (strengthCard2 != 0) return strengthCard2
-        val strengthCard3 = strength(cards[2]).compareTo(strength(other.cards[2]))
-        if (strengthCard3 != 0) return strengthCard3
-        val strengthCard4 = strength(cards[3]).compareTo(strength(other.cards[3]))
-        if (strengthCard4 != 0) return strengthCard4
-        val strengthCard5 = strength(cards[4]).compareTo(strength(other.cards[4]))
-        if (strengthCard5 != 0) return strengthCard5
-
-        // real poker rules:
-//        val countGroup1 = freq[0].value.compareTo(other.freq[0].value)
-//        if (countGroup1 != 0) return countGroup1
-//        val strengthGroup1 = strength(freq[0].key).compareTo(strength(other.freq[0].key))
-//        if (strengthGroup1 != 0) return strengthGroup1
-//
-//        if (freq.size > 1 && other.freq.size > 1) {
-//            val countGroup2 = freq[1].value.compareTo(other.freq[1].value)
-//            if (countGroup2 != 0) return countGroup2
-//            val strengthGroup2 = strength(freq[1].key).compareTo(strength(other.freq[1].key))
-//            if (strengthGroup2 != 0) return strengthGroup2
-//        }
-//
-//        if (freq.size > 2 && other.freq.size > 2) {
-//            val countGroup3 = freq[2].value.compareTo(other.freq[2].value)
-//            if (countGroup3 != 0) return countGroup3
-//            val strengthGroup3 = strength(freq[2].key).compareTo(strength(other.freq[2].key))
-//            if (strengthGroup3 != 0) return strengthGroup3
-//        }
-//
-//        if (freq.size > 3 && other.freq.size > 3) {
-//            val countGroup4 = freq[3].value.compareTo(other.freq[3].value)
-//            if (countGroup4 != 0) return countGroup4
-//            val strengthGroup4 = strength(freq[3].key).compareTo(strength(other.freq[3].key))
-//            if (strengthGroup4 != 0) return strengthGroup4
-//        }
-//
-//        if (freq.size > 4 && other.freq.size > 4) {
-//            val countGroup4 = freq[4].value.compareTo(other.freq[4].value)
-//            if (countGroup4 != 0) return countGroup4
-//            val strengthGroup4 = strength(freq[4].key).compareTo(strength(other.freq[4].key))
-//            if (strengthGroup4 != 0) return strengthGroup4
-//        }
-
-        throw RuntimeException("Should not happen, comparing $this with $other")
+        // --> it is enough two compare the first 2 groups to determine hand type
+        return compareBy(
+            { hand: Hand -> hand.freq[0].value },
+            { hand: Hand -> hand.freq[1].value },
+            // after this we now we have two equally strong hands, so we need to compare the individual cards
+            // "second ordering rule" in text
+            { hand: Hand -> strength(hand.cards[0]) },
+            { hand: Hand -> strength(hand.cards[1]) },
+            { hand: Hand -> strength(hand.cards[2]) },
+            { hand: Hand -> strength(hand.cards[3]) },
+            { hand: Hand -> strength(hand.cards[4]) }).compare(this, other)
     }
 
     fun type(): Type {
