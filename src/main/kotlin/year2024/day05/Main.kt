@@ -1,67 +1,67 @@
 package year2024.day05
 
 fun main() {
-    part1(SAMPLE).let { println(it) } // 143
-    part1(INPUT).let { println(it) }  // 4185
+    AOC2024D05(SAMPLE).solvePart1().let { println(it) } // 143
+    AOC2024D05(INPUT).solvePart1().let { println(it) } // 4185
 
-    part2(SAMPLE).let { println(it) } //
-    part2(INPUT).let { println(it) } // 4480
+    AOC2024D05(SAMPLE).solvePart2().let { println(it) } // 123
+    AOC2024D05(INPUT).solvePart2().let { println(it) } // 4480
 }
 
-fun part1(input: String): Int {
-    val rules = input.lines().takeWhile { it.isNotEmpty() }
-    val updates = input.lines().takeLastWhile { it.isNotEmpty() }.map { it.split(",").map { i -> i.toInt() } }
+class AOC2024D05(input: String) {
+    private val rules = input.lines().takeWhile { it.isNotEmpty() }.map { toRule(it) }
+    private val updates = input.lines().takeLastWhile { it.isNotEmpty() }.map { it.split(",").map { i -> i.toInt() } }
 
-    return updates
-        .filter { isCorrect(it, rules) }
-        .sumOf { middleElement(it) }
-}
+    fun solvePart1(): Int {
+        return updates
+            .filter { isCorrect(it, rules) }
+            .sumOf { middleElement(it) }
+    }
 
-fun part2(input: String): Int {
-    val rules = input.lines().takeWhile { it.isNotEmpty() }
-    val comp = ComparatorByRules(rules.map { ruleToPair(it) })
-    val updates = input.lines().takeLastWhile { it.isNotEmpty() }.map { it.split(",").map { i -> i.toInt() } }
+    fun solvePart2(): Int {
+        val comp = ComparatorByRules(rules)
+        return updates
+            .filter { !isCorrect(it, rules) }
+            .map { x -> x.sortedWith(comp) }
+            .sumOf { middleElement(it) }
+    }
 
-    return updates
-        .filter { !isCorrect(it, rules) }
-        .map { x -> x.sortedWith(comp) }
-        .sumOf { middleElement(it) }
-}
+    private fun toRule(s: String): Rule {
+        val (x, y) = s.split("|").map { it.toInt() }
+        return Pair(x, y)
+    }
 
-fun ruleToPair(s: String): Pair<Int, Int> {
-    val (x, y) = s.split("|").map { it.toInt() }
-    return Pair(x, y)
-}
+    private fun isCorrect(updates: Updates, rules: List<Rule>): Boolean {
+        rules.forEach { r ->
+            val indexOfX = updates.indexOf(r.first)
+            val indexOfY = updates.indexOf(r.second)
 
-fun isCorrect(update: List<Int>, rules: List<String>): Boolean {
-    rules.forEach { r ->
-        val (x, y) = r.split("|").map { it.toInt() }
-        val indexOfX = update.indexOf(x)
-        val indexOfY = update.indexOf(y)
+            // we found a rule that is illegal -> update is not correct
+            if (indexOfX >= 0 && indexOfY >= 0 && indexOfX > indexOfY) {
+                return false
+            }
+        }
+        return true
+    }
 
-        // we found a rule that is illegal -> update is not correct
-        if (indexOfX >= 0 && indexOfY >= 0 && indexOfX > indexOfY) {
-            return false
+    private fun <T> middleElement(list: List<T>): T {
+        return list[list.size / 2]
+    }
+
+    // the rules define our comparison order
+    class ComparatorByRules(private val rules: List<Rule>): Comparator<Int> {
+        override fun compare(o1: Int, o2: Int): Int {
+            if (rules.contains(Rule(o1, o2))) {
+                return 1
+            }
+            if (rules.contains(Rule(o2, o1))) {
+                return -1
+            }
+            return 0
         }
     }
-    return true
 }
 
-fun <T> middleElement(list: List<T>): T {
-    val m = list[list.size / 2]
-//    println("$list -> $m")
-    return m
-}
+typealias Rule = Pair<Int, Int>
 
-// the rules define our comparison order
-class ComparatorByRules(private val rules: List<Pair<Int, Int>>): Comparator<Int> {
-    override fun compare(o1: Int?, o2: Int?): Int {
-        if (rules.contains(Pair(o1, o2))) {
-            return 1
-        }
-        if (rules.contains(Pair(o2, o1))) {
-            return -1
-        }
-        return 0
-    }
-}
+typealias Updates = List<Int>

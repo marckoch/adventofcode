@@ -1,54 +1,53 @@
 package year2024.day03
 
-val MUL_PATTERN = """mul\((\d\d?\d?),(\d\d?\d?)\)""".toRegex()
-
-val MUL_PATTERN2 = """mul\((\d\d?\d?),(\d\d?\d?)\)|do\(\)|don't\(\)""".toRegex()
-
 fun main() {
-    part1(SAMPLE).let { println(it) } // 161
-    part1(INPUT).let { println(it) }  // 170778545
+    AOC2024D03(SAMPLE).solvePart1().let { println(it) } // 161
+    AOC2024D03(INPUT).solvePart1().let { println(it) }  // 170778545
 
-    part2(SAMPLE2).let { println(it) } // 48
-    part2(INPUT).let { println(it) } // 82868252
+    AOC2024D03(SAMPLE2).solvePart2().let { println(it) } // 48
+    AOC2024D03(INPUT).solvePart2().let { println(it) } // 82868252
 }
 
-fun part1(input: String): Long {
-    return input.lines().joinToString().let { line -> mul1(line) }
-}
+class AOC2024D03(rawInput: String) {
+    val input = rawInput.lines().joinToString()
 
-fun part2(input: String): Long {
-    return input.lines().joinToString().let { line -> mul2(line) }
-}
+    fun solvePart1(): Long {
+        val MUL_PATTERN = """mul\((\d\d?\d?),(\d\d?\d?)\)""".toRegex()
 
-fun mul1(line:String): Long {
-    return MUL_PATTERN.findAll(line).sumOf {
-        val (n1,n2) = it.destructured
-        n1.toLong() * n2.toLong()
+        return MUL_PATTERN.findAll(input).sumOf {
+            eval(it)
+        }
     }
-}
 
-fun mul2(line: String): Long {
-    var enabled = true
-    return MUL_PATTERN2.findAll(line).fold(0L) { acc, it ->
-        val group = it.groupValues.first()
-        val sum = when (group) {
-            "do()" -> {
-                enabled = true
-                0
-            }
-            "don't()" -> {
-                enabled = false
-                0
-            }
-            else -> {
-                if (enabled) {
-                    val (n1, n2) = it.destructured
-                    n1.toLong() * n2.toLong()
-                } else {
+    fun solvePart2(): Long {
+        val MUL_PATTERN2 = """mul\((\d\d?\d?),(\d\d?\d?)\)|do\(\)|don't\(\)""".toRegex()
+
+        var enabled = true
+        return MUL_PATTERN2.findAll(input).fold(0L) { acc, it ->
+            val group = it.groupValues.first()
+            val sum = when (group) {
+                "do()" -> {
+                    enabled = true
                     0
                 }
+                "don't()" -> {
+                    enabled = false
+                    0
+                }
+                else -> {
+                    if (enabled) {
+                        eval(it)
+                    } else {
+                        0
+                    }
+                }
             }
+            acc + sum
         }
-        acc + sum
+    }
+
+    private fun eval(matchResult: MatchResult): Long {
+        val (n1, n2) = matchResult.destructured
+        return n1.toLong() * n2.toLong()
     }
 }

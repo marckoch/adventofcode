@@ -8,10 +8,13 @@ class Year2024Day02Test {
 
     @Test
     fun part1() {
-        assertThat(part1(SAMPLE)).isEqualTo(2)
-        assertThat(part1(INPUT)).isEqualTo(680)
+        assertThat(AOC2024D02(SAMPLE).solvePart1()).isEqualTo(2)
+        assertThat(AOC2024D02(INPUT).solvePart1()).isEqualTo(680)
+    }
 
-        assertThat(part2(SAMPLE)).isEqualTo(4)
-        assertThat(part2(INPUT)).isEqualTo(710)
+    @Test
+    fun part2() {
+        assertThat(AOC2024D02(SAMPLE).solvePart2()).isEqualTo(4)
+        assertThat(AOC2024D02(INPUT).solvePart2()).isEqualTo(710)
     }
 }
