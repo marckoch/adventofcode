@@ -13,4 +13,9 @@ class Year2024Day15Test {
         assertThat(AOC2024D15(INPUT).solve()).isEqualTo(1371036)
     }
 
+    @Test
+    fun part2() {
+        assertThat(AOC2024D15(SAMPLE).solve2()).isEqualTo(9021)
+    }
+
 }

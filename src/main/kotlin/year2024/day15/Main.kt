@@ -1,6 +1,5 @@
 package year2024.day15
 
-
 fun main() {
 //    AOC2024D15(SAMPLE).solve().also(::println) // 10092
 //    AOC2024D15(SAMPLE2).solve().also(::println) // 2028
@@ -8,7 +7,8 @@ fun main() {
 //    AOC2024D15(INPUT).solve().also(::println) // 1371036
 
     AOC2024D15(SAMPLE).solve2().also(::println) // 9021
-//    AOC2024D15(INPUT).solve2().also(::println) // 1390733 too low, 1409190 too high, 1391033 too low
+//    AOC2024D15(INPUT).solve2().also(::println) // 1390733 too low, 1409190 too high, 1391033 too low , 1393439 1406434
+//    AOC2024D15(SAMPLE4).solve2().also(::println)
 }
 
 enum class Direction(val c: Char) {
@@ -36,6 +36,13 @@ enum class Type(val c: Char) {
 enum class Type2(val c: Char) {
     WALL('#'), BOX_LEFT('['), BOX_RIGHT(']'), ROBOT('@'), FREE('.');
 
+    fun otherBoxHalf(): Type2 {
+        return when (this) {
+            BOX_LEFT -> BOX_RIGHT
+            BOX_RIGHT -> BOX_LEFT
+            WALL, ROBOT, FREE -> throw IllegalArgumentException("wrong input")
+        }
+    }
     companion object {
         fun fromChar(pChar: Char): Type2 {
             return entries.find { it.c == pChar }
@@ -85,53 +92,62 @@ class Map(val lines: List<String>) {
         }
     }
 
-    private fun getType(point: Point): Type {
+    private fun typeOf(point: Point): Type {
         return fields[point.row][point.col]
     }
 
-    private fun setType(point: Point, value: Type) {
+    private fun set(point: Point, value: Type) {
         fields[point.row][point.col] = value
     }
 
-    fun moveRobot(dir: Direction) {
-        val fieldAhead = robot.neighbor(dir)
-        when (getType(fieldAhead)) {
-            Type.BOX -> {
-                val boxWasMoved = moveBox(fieldAhead, dir)
-                if (boxWasMoved)
-                    moveRobot(dir)
-            }
-            Type.FREE -> {
-                setType(robot, Type.FREE)
-                robot = fieldAhead
-            }
-            Type.WALL, Type.ROBOT -> return
+    fun tryRobotMove(dir: Direction) {
+        val nextRobotField = robot.neighbor(dir)
+        if (typeOf(nextRobotField) == Type.BOX && canBoxMove(nextRobotField, dir)) {
+            moveBox(nextRobotField, dir)
+        }
+        if (typeOf(nextRobotField) == Type.FREE) {
+            set(robot, Type.FREE)
+            robot = nextRobotField
         }
     }
 
-    private fun moveBox(field: Point, dir: Direction): Boolean {
+//    private fun canRobotMove(field: Point, dir: Direction): Boolean {
+//        val fieldAhead = field.neighbor(dir)
+//        if (typeOf(fieldAhead) == Type.FREE) return true
+//        if (typeOf(fieldAhead) == Type.BOX) return canBoxMove(fieldAhead, dir)
+//        return false
+//    }
+
+    private fun moveBox(field: Point, dir: Direction) {
         val fieldAhead = field.neighbor(dir)
-        when (getType(fieldAhead)) {
-            Type.BOX -> return moveBox(fieldAhead, dir)
-            Type.FREE -> {
-                setType(field, Type.FREE)
-                setType(fieldAhead, Type.BOX)
-                return true
-            }
-            Type.WALL, Type.ROBOT -> return false
+        if (typeOf(fieldAhead) == Type.BOX && canBoxMove(fieldAhead, dir)) {
+            moveBox(fieldAhead, dir)
         }
+        if (typeOf(fieldAhead) == Type.FREE) {
+            set(field, Type.FREE)
+            set(fieldAhead, Type.BOX)
+        }
+    }
+
+    private fun canBoxMove(field: Point, dir: Direction): Boolean {
+        val fieldAhead = field.neighbor(dir)
+        if (typeOf(fieldAhead) == Type.FREE) return true
+        if (typeOf(fieldAhead) == Type.BOX) return canBoxMove(fieldAhead, dir)
+        return false
     }
 
     fun gpsSum(): Long {
-        var sum = 0L
-        for (r in 0 until rows) {
-            for (c in 0 until cols) {
-                if (getType(Point(r, c)) == Type.BOX) {
-                    sum += 100 * r + c
-                }
+        return allPoints().filter { typeOf(it) == Type.BOX }.sumOf { 100L * it.row + it.col }
+    }
+
+    private fun allPoints(): List<Point> {
+        val points = mutableListOf<Point>()
+        for (row in 0 until rows) {
+            for (col in 0 until cols) {
+                points.add(Point(row, col))
             }
         }
-        return sum
+        return points
     }
 
     override fun toString(): String {
@@ -181,124 +197,194 @@ class Map2(val lines: List<String>) {
             }
         }
     }
-
-    private fun getType(point: Point): Type2 {
+    private fun typeOf(point: Point): Type2 {
         return fields[point.row][point.col]
     }
-
-    private fun setType(point: Point, value: Type2) {
+    private fun set(point: Point, value: Type2) {
         fields[point.row][point.col] = value
     }
 
-    fun moveRobot(dir: Direction) {
-        val fieldAhead = robot.neighbor(dir)
-        when (getType(fieldAhead)) {
-            Type2.BOX_LEFT -> {
-                val boxWasMoved = moveBox(fieldAhead, dir)
-                if (boxWasMoved)
-                    moveRobot(dir)
-            }
-            Type2.BOX_RIGHT -> {
-                val boxWasMoved = moveBox(fieldAhead, dir)
-                if (boxWasMoved)
-                    moveRobot(dir)
-            }
-            Type2.FREE -> {
-                setType(robot, Type2.FREE)
-                robot = fieldAhead
-            }
-            Type2.WALL, Type2.ROBOT -> return
+    fun tryRobotMove(dir: Direction) {
+        val nextRobotField = robot.neighbor(dir)
+        if (typeOf(nextRobotField) == Type2.BOX_LEFT || typeOf(nextRobotField) == Type2.BOX_RIGHT
+            && canBoxMove(nextRobotField, dir)
+            ) {
+            moveBox(nextRobotField, dir)
+        }
+        if (typeOf(nextRobotField) == Type2.FREE) {
+            set(robot, Type2.FREE)
+            robot = nextRobotField
         }
     }
 
-    private fun moveBox(field: Point, dir: Direction): Boolean {
+    private fun canBoxMove(field: Point, dir: Direction): Boolean {
+        val thisType = typeOf(field)
+        val fieldAhead = field.neighbor(dir)
+        val fieldAheadOtherHalf = if (thisType == Type2.BOX_LEFT) fieldAhead.east() else fieldAhead.west()
+        val fieldOtherHalf = if (thisType == Type2.BOX_LEFT) field.east() else field.west()
+
         if (dir == Direction.WEST || dir == Direction.EAST) {
-            val fieldAhead = field.neighbor(dir)
-            when (getType(fieldAhead)) {
-                Type2.BOX_LEFT, Type2.BOX_RIGHT -> return moveBox(fieldAhead, dir)
-                Type2.FREE -> {
-                    if (getType(field) == Type2.BOX_LEFT) {
-                        setType(fieldAhead, Type2.BOX_LEFT)
-                    } else if (getType(field) == Type2.BOX_RIGHT) {
-                        setType(fieldAhead, Type2.BOX_RIGHT)
-                    }
-                    setType(field, Type2.FREE)
-                    return true
-                }
-                Type2.WALL, Type2.ROBOT -> return false
+            if (typeOf(fieldAhead) == Type2.FREE) return true
+            if (typeOf(fieldAhead) == Type2.BOX_LEFT || typeOf(fieldAhead) == Type2.BOX_RIGHT)
+                return canBoxMove(fieldAhead, dir)
+            return false
+        }
+
+        if (typeOf(fieldAhead) == Type2.FREE && typeOf(fieldAheadOtherHalf) == Type2.FREE) return true
+
+        // full block
+        // []
+        // []
+        if ( (thisType == Type2.BOX_LEFT && typeOf(fieldAhead) == Type2.BOX_LEFT) ||
+             (thisType == Type2.BOX_RIGHT && typeOf(fieldAhead) == Type2.BOX_RIGHT) ) {
+            return canBoxMove(fieldAhead, dir) && canBoxMove(fieldAheadOtherHalf, dir)
+        }
+
+        // half block west
+        // []
+        //  []
+        if (thisType == Type2.BOX_LEFT && typeOf(fieldAhead) == Type2.BOX_RIGHT && typeOf(fieldAheadOtherHalf) == Type2.FREE) {
+            return canBoxMove(fieldAhead, dir)
+        }
+
+        // half block east
+        //  []
+        // []
+        if (thisType == Type2.BOX_RIGHT && typeOf(fieldAhead) == Type2.BOX_LEFT && typeOf(fieldAheadOtherHalf) == Type2.FREE) {
+            return canBoxMove(fieldAhead, dir)
+        }
+
+        // double block
+        // [][]
+        //  []
+        if ((thisType == Type2.BOX_LEFT && typeOf(fieldAhead) == Type2.BOX_RIGHT && typeOf(fieldAheadOtherHalf) == Type2.BOX_LEFT) ||
+            (thisType == Type2.BOX_RIGHT && typeOf(fieldAhead) == Type2.BOX_LEFT && typeOf(fieldAheadOtherHalf) == Type2.BOX_RIGHT) ) {
+            return canBoxMove(fieldAhead, dir) && canBoxMove(fieldAheadOtherHalf, dir)
+        }
+
+        return false
+    }
+
+    // TODO: SAMPLE4 shows error:
+    //    #
+    // [][]
+    //  []
+    //  @
+    // should not move up, but my code does move left box up :-(
+    // [] #
+    //   []
+    //  []
+    //  @
+    private fun moveBox(field: Point, dir: Direction) {
+        val fieldAhead = field.neighbor(dir)
+
+        if (dir == Direction.WEST || dir == Direction.EAST) {
+            if (typeOf(fieldAhead) == Type2.BOX_LEFT || typeOf(fieldAhead) == Type2.BOX_RIGHT) {
+                moveBox(fieldAhead, dir)
+            }
+
+            if (typeOf(fieldAhead) == Type2.FREE) {
+                set(fieldAhead, typeOf(field))
+                set(field, Type2.FREE)
             }
         } else {
             // move both halves of a box
-            val thisType = getType(field)
-            val partnerType = if (thisType == Type2.BOX_LEFT) Type2.BOX_RIGHT else Type2.BOX_LEFT
-            val fieldAhead = field.neighbor(dir)
-            val fieldAheadOfPartner = if (thisType == Type2.BOX_LEFT) fieldAhead.east() else fieldAhead.west()
+            val thisType = typeOf(field)
+            val fieldAheadOtherHalf = if (thisType == Type2.BOX_LEFT) fieldAhead.east() else fieldAhead.west()
+            val fieldOtherHalf = if (thisType == Type2.BOX_LEFT) field.east() else field.west()
             if (thisType == Type2.BOX_LEFT) {
-                if (getType(fieldAhead) == Type2.FREE && getType(fieldAheadOfPartner) == Type2.FREE) {
-                    // both fields ahead are free -> move both box halves
-                    setType(fieldAhead, thisType)
-                    setType(fieldAheadOfPartner, partnerType)
-                    setType(field, Type2.FREE)
-                    setType(field.east(), Type2.FREE)
-                    return true
-                }
 
-                if (getType(fieldAhead) == Type2.BOX_LEFT) {
+                if (typeOf(fieldAhead) == thisType) {
                     // full block
+                    // []
+                    // []
                     val m1 = moveBox(fieldAhead, dir)
-                    val m2 = moveBox(fieldAheadOfPartner, dir)
-                    return m1 || m2
+                    val m2 = moveBox(fieldAheadOtherHalf, dir)
                 }
 
-                if (getType(fieldAhead) == Type2.BOX_RIGHT) {
+                // half block west
+                // []
+                //  []
+                if (typeOf(fieldAhead) == Type2.BOX_RIGHT && isFree(fieldAheadOtherHalf)) {
                     val m1 = moveBox(fieldAhead.west(), dir)
                     val m2 = moveBox(fieldAhead, dir)
-                    return m1 || m2
                 }
-                if (getType(fieldAhead.east()) == Type2.BOX_LEFT) {
-                    val m1 = moveBox(fieldAhead.east(), dir)
-                    val m2 = moveBox(fieldAhead.east().east(), dir)
-                    return m1 || m2
+
+                // half block east
+                //  []
+                // []
+                if (typeOf(fieldAheadOtherHalf) == Type2.BOX_LEFT && isFree(fieldAhead)) {
+                    val m1 = moveBox(fieldAheadOtherHalf, dir)
+                    val m2 = moveBox(fieldAheadOtherHalf.east(), dir)
+                }
+
+                // double block
+                // [][]
+                //  []
+                if (typeOf(fieldAhead) == Type2.BOX_RIGHT && typeOf(fieldAheadOtherHalf) == Type2.BOX_LEFT) {
+                    val m1 = moveBox(fieldAhead.west(), dir)
+                    val m2 = moveBox(fieldAhead, dir)
+                    val m3 = moveBox(fieldAheadOtherHalf, dir)
+                    val m4 = moveBox(fieldAheadOtherHalf.east(), dir)
+                }
+
+                if (isFree(fieldAhead) && isFree(fieldAheadOtherHalf)) {
+                    // both fields ahead are free -> move both box halves
+                    set(fieldAhead, thisType)
+                    set(fieldAheadOtherHalf, thisType.otherBoxHalf())
+                    set(field, Type2.FREE)
+                    set(fieldOtherHalf, Type2.FREE)
                 }
             } else if (thisType == Type2.BOX_RIGHT) {
-                if (getType(fieldAhead) == Type2.FREE && getType(fieldAheadOfPartner) == Type2.FREE) {
-                    setType(fieldAhead, thisType)
-                    setType(fieldAheadOfPartner, partnerType)
-                    setType(field, Type2.FREE)
-                    setType(field.west(), Type2.FREE)
-                    return true
-                } else if (getType(fieldAhead) == Type2.BOX_RIGHT) {
+
+
+                if (typeOf(fieldAhead) == thisType) {
                     val m1 = moveBox(fieldAhead, dir)
-                    val m2 = moveBox(fieldAheadOfPartner, dir)
-                    return m1 || m2
+                    val m2 = moveBox(fieldAheadOtherHalf, dir)
                 }
 
-
-                if (getType(fieldAhead) == Type2.BOX_LEFT) {
+                if (typeOf(fieldAhead) == Type2.BOX_LEFT && isFree(fieldAheadOtherHalf)) {
                     val m1 = moveBox(fieldAhead, dir)
                     val m2 = moveBox(fieldAhead.east(), dir)
-                    return m1 || m2
                 }
-                if (getType(fieldAhead.west()) == Type2.BOX_RIGHT) {
-                    val m1 = moveBox(fieldAhead.west(), dir)
-                    val m2 = moveBox(fieldAhead.west().west(), dir)
-                    return m1 || m2
+                if (typeOf(fieldAheadOtherHalf) == Type2.BOX_RIGHT && isFree(fieldAhead)) {
+                    val m1 = moveBox(fieldAheadOtherHalf, dir)
+                    val m2 = moveBox(fieldAheadOtherHalf.west(), dir)
+                }
+
+                if (typeOf(fieldAhead) == Type2.BOX_LEFT && typeOf(fieldAheadOtherHalf) == Type2.BOX_RIGHT) {
+                    val m1 = moveBox(fieldAhead.east(), dir)
+                    val m2 = moveBox(fieldAhead, dir)
+                    val m3 = moveBox(fieldAheadOtherHalf, dir)
+                    val m4 = moveBox(fieldAheadOtherHalf.west(), dir)
+                }
+
+                if (isFree(fieldAhead) && isFree(fieldAheadOtherHalf)) {
+                    set(fieldAhead, thisType)
+                    set(fieldAheadOtherHalf, thisType.otherBoxHalf())
+                    set(field, Type2.FREE)
+                    set(fieldOtherHalf, Type2.FREE)
                 }
             }
-            return false
         }
     }
 
+    private fun isFree(point: Point): Boolean {
+        return typeOf(point) == Type2.FREE
+    }
+
     fun gpsSum(): Long {
-        var sum = 0L
-        for (r in 0 until rows) {
-            for (c in 0 until cols) {
-                if (getType(Point(r, c)) == Type2.BOX_LEFT) {
-                    sum += 100 * r + c
-                }
+        return allPoints().filter { typeOf(it) == Type2.BOX_LEFT }.sumOf { 100L * it.row + it.col }
+    }
+
+    private fun allPoints(): List<Point> {
+        val points = mutableListOf<Point>()
+        for (row in 0 until rows) {
+            for (col in 0 until cols) {
+                points.add(Point(row, col))
             }
         }
-        return sum
+        return points
     }
 
     override fun toString(): String {
@@ -329,8 +415,10 @@ class AOC2024D15(val input: String) {
         val map = Map(chunks[0])
         val commands = chunks[1].joinToString("")
 
-        commands.forEach {
-            map.moveRobot(Direction.fromChar(it))
+        for (it in commands.withIndex()) {
+//            println("moving ${it.value} (${it.index})")
+            map.tryRobotMove(Direction.fromChar(it.value))
+//            map.print()
         }
 
         return map.gpsSum()
@@ -344,11 +432,11 @@ class AOC2024D15(val input: String) {
 
         map.print()
 
-        commands.withIndex().forEach {
+        for (it in commands.withIndex()) {
             println("moving ${it.value} (${it.index})")
-            map.moveRobot(Direction.fromChar(it.value))
+            map.tryRobotMove(Direction.fromChar(it.value))
+            map.print()
         }
-        map.print()
 
         return map.gpsSum()
     }
