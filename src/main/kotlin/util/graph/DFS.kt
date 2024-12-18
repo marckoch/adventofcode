@@ -1,5 +1,7 @@
 package util.graph
 
+import util.point.Point
+
 const val SAMPLE = """Sabqponm
 abcryxxl
 accszExk
@@ -143,6 +145,3 @@ fun elevation(map: List<String>, p: Point): Char {
         else -> c
     }
 }
-
-typealias Point = Pair<Int, Int> // (row, col), e.g. (y, x)
-
