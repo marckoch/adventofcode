@@ -3,11 +3,11 @@ package year2024.day17
 import kotlin.math.pow
 
 fun main() {
-//    AOC2024D17(SAMPLE).solve().also(::println)
-//    AOC2024D17(SAMPLE2).solve().also(::println)
-//    AOC2024D17(INPUT).solve().also(::println)
+    AOC2024D17(SAMPLE).solve().also(::println)
+    AOC2024D17(SAMPLE2).solve().also(::println)
+    AOC2024D17(INPUT).solve().also(::println)
 
-    AOC2024D17(INPUT).solve2().also(::println)
+//    AOC2024D17(INPUT).solve2().also(::println)
 }
 
 // 2,4,1,4,7,5,4,1,1,4,5,5,0,3,3,0
@@ -22,7 +22,7 @@ fun main() {
 
 class AOC2024D17(val input: String) {
     fun solve(): String {
-//        Computer(input).printState()
+        Computer(input).printState()
         return Computer(input).run()
     }
 
@@ -94,7 +94,6 @@ class Computer(input: String) {
                 4 -> regB = regB xor regC
                 5 -> {
                     output.add(comboOperand % 8)
-                    pointer++
                     if (abort && initialProgram.take(output.size) != output) {
                         break
                     }
