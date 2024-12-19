@@ -3,18 +3,70 @@ package util.graph
 import util.point.Point
 import util.point.neighbors
 import java.util.*
+import java.util.function.BiFunction
 import kotlin.collections.ArrayDeque
 
-class Labyrinth(
-    private val width: Int,
-    private val height: Int,
-    obstacles: List<Point>,
-    private val start: Point = Point(0, 0),
-    private val end: Point = Point(width - 1, height - 1)
-) {
-    private val fields = List(height) { CharArray(width) { '.' } }
-    init {
-        obstacles.forEach { obstacle -> fields[obstacle.first][obstacle.second] = '#' }
+enum class Direction {
+    NORTH, WEST, SOUTH, EAST;
+
+    fun turnLeft(): Direction {
+        return when (this) {
+            NORTH -> WEST
+            WEST -> SOUTH
+            SOUTH -> EAST
+            EAST -> NORTH
+        }
+    }
+
+    fun turnRight(): Direction {
+        return when (this) {
+            NORTH -> EAST
+            EAST -> SOUTH
+            SOUTH -> WEST
+            WEST -> NORTH
+        }
+    }
+}
+
+class Labyrinth(private val fields: List<CharArray>,
+                val start: Point = Point(0, 0),
+                val end: Point = Point(fields.first().size - 1,  fields.size - 1)) {
+    val height: Int = fields.size
+    val width: Int = fields.first().size
+
+    companion object {
+        fun fromObstacleList(width: Int, height: Int, obstacles: List<Point>): Labyrinth {
+            val fields = List(height) { CharArray(width) { '.' } }
+            obstacles.forEach { obstacle -> fields[obstacle.first][obstacle.second] = '#' }
+            return Labyrinth(fields)
+        }
+
+        /**
+         * expect a list of strings, 'S' indicates start, 'E' indicates end point
+         * #######
+         * #.#..E#
+         * #S..#.#
+         * #######
+         */
+        fun fromStrings(strings: List<String>): Labyrinth {
+            val height: Int = strings.size
+            val width: Int = strings.first().length
+            var start: Point = Point(0, 0)
+            var end: Point = Point(width - 1, height - 1)
+            val fields = List(height) { CharArray(width) { '.' } }
+
+            strings.withIndex().forEach { (row, line) ->
+                line.withIndex().forEach { (column, char) ->
+                    fields[row][column] = char
+                    if (char == 'S') {
+                        start = Point(row, column)
+                    } else if (char == 'E') {
+                        end = Point(row, column)
+                    }
+                }
+            }
+            return Labyrinth(fields, start, end)
+        }
     }
 
     fun dfs(): List<List<Point>> {
@@ -98,20 +150,46 @@ class Labyrinth(
         val costs = List(height) { MutableList(width) { Int.MAX_VALUE } }
         costs[start.first][start.second] = 0
 
-        val nextPoints = PriorityQueue<Pair<Point, Int>> { o1, o2 -> o1.second.compareTo(o2.second) }
-        nextPoints.add(start to 0)
+        val unvisited = PriorityQueue<Pair<Point, Int>> { o1, o2 -> o1.second.compareTo(o2.second) }
+        unvisited.add(start to 0)
 
         val visited = mutableSetOf<Point>()
-        while (nextPoints.isNotEmpty()) {
+        while (unvisited.isNotEmpty()) {
             // find unvisited point with minimal cost
-            val (point, cost) = nextPoints.poll()
+            val (point, cost) = unvisited.poll()
             if (visited.contains(point)) continue
 
             for (n in validNeighborsOf(point)) {
                 val newCost = cost + n.first + n.second
                 if (newCost < costs[n.first][n.second]) {
                     costs[n.first][n.second] = newCost
-                    nextPoints.add(n to newCost)
+                    unvisited.add(n to newCost)
+                }
+            }
+
+            visited.add(point)
+        }
+        return costs
+    }
+
+    fun dijkstraCosts(costFn: BiFunction<Point, Point, Int>): List<List<Int>> {
+        val costs = List(height) { MutableList(width) { Int.MAX_VALUE } }
+        costs[start.first][start.second] = 0
+
+        val unvisited = PriorityQueue<Pair<Point, Int>> { o1, o2 -> o1.second.compareTo(o2.second) }
+        unvisited.add(start to 0)
+
+        val visited = mutableSetOf<Point>()
+        while (unvisited.isNotEmpty()) {
+            // find unvisited point with minimal cost
+            val (point, cost) = unvisited.poll()
+            if (visited.contains(point)) continue
+
+            for (n in validNeighborsOf(point)) {
+                val newCost = cost + costFn.apply(point, n)
+                if (newCost < costs[n.first][n.second]) {
+                    costs[n.first][n.second] = newCost
+                    unvisited.add(n to newCost)
                 }
             }
 
@@ -144,17 +222,17 @@ class Labyrinth(
         return path
     }
 
-    private fun validNeighborsOf(from: Point): List<Point> {
+    fun validNeighborsOf(from: Point): List<Point> {
         return from.neighbors()
             .filter { isInsideMap(it) }
             .filter { isNotObstacle(it)}
     }
 
-    private fun isInsideMap(p: Point): Boolean {
+    fun isInsideMap(p: Point): Boolean {
         return p.first in 0 until width && p.second in 0 until height
     }
 
-    private fun isNotObstacle(p: Point): Boolean {
+    fun isNotObstacle(p: Point): Boolean {
         return fields[p.first][p.second] != '#'
     }
 

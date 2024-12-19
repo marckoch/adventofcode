@@ -22,7 +22,7 @@ class AOC2024D18(val input: String) {
     fun solve(width: Int, height: Int, limit: Int): Int {
         val obstacles = input.lines().map { it.toPoint() }
 
-        val shortestPath = Labyrinth(width, height, obstacles.take(limit)).dijkstraPath()
+        val shortestPath = Labyrinth.fromObstacleList(width, height, obstacles.take(limit)).dijkstraPath()
 
         return shortestPath.size - 1
     }
@@ -38,7 +38,7 @@ class AOC2024D18(val input: String) {
         val obstacles = input.lines().map { it.toPoint() }
 
         for (i in offset..obstacles.lastIndex) {
-            val costs = Labyrinth(width, height, obstacles.take(i)).dijkstraCosts()
+            val costs = Labyrinth.fromObstacleList(width, height, obstacles.take(i)).dijkstraCosts()
             if (costs[width - 1][height - 1] == Int.MAX_VALUE) {
                 val o = obstacles[i - 1]
                 return "${o.second},${o.first}"
