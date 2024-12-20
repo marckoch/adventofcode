@@ -1,6 +1,7 @@
 package util.point
 
 import util.graph.Direction
+import kotlin.math.abs
 
 typealias Point = Pair<Int, Int> // (row, col), e.g. (y, x)
 
@@ -20,4 +21,8 @@ fun Point.dirTo(to: Point): Direction {
         0 to 1 -> Direction.EAST
         else -> throw IllegalArgumentException("Unknown direction: $diff based on $this to $to")
     }
+}
+
+fun Point.manhattanDistanceTo(other: Point): Int {
+    return abs(this.first - other.first) + abs(this.second - other.second)
 }
