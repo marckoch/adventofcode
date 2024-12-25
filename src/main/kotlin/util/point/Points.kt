@@ -23,6 +23,33 @@ fun Point.dirTo(to: Point): Direction {
     }
 }
 
+fun step(c: Char): Pair<Int, Int> {
+    return when (c) {
+        'v' -> Pair(0, -1)
+        '^' -> Pair(0, 1)
+        '<' -> Pair(-1, 0)
+        '>' -> Pair(1, 0)
+        else -> Pair(0, 0)
+    }
+}
+
+fun Point.move(c: Char): Point {
+    return when (c) {
+        'v' -> this.copy(second = this.second - 1)
+        '^' ->  this.copy(second = this.second + 1)
+        '<' ->  this.copy(first = this.first - 1)
+        '>' -> this.copy(first = this.first + 1)
+        else -> this
+    }
+}
+
 fun Point.manhattanDistanceTo(other: Point): Int {
     return abs(this.first - other.first) + abs(this.second - other.second)
 }
+
+infix operator fun Point.plus(p: Point) = Point(this.first + p.first, this.second + p.second)
+
+//operator fun Pair<Int, Int>.plus(that: Pair<Int, Int>): Pair<Int, Int> {
+//    return Pair(this.first + that.first, this.second + that.second)
+//}
+infix operator fun Point.minus(p: Point) = Point(this.first - p.first, this.second - p.second)
