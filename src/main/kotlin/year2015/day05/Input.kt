@@ -1,6 +1,7 @@
 package year2015.day05
 
-const val INPUT = """rthkunfaakmwmush
+val INPUT = """
+rthkunfaakmwmush
 qxlnvjguikqcyfzt
 sleaoasjspnjctqt
 lactpmehuhmzwfjl
@@ -999,4 +1000,5 @@ uajaprnrrkvggqgx
 xdlxuguloojvskjq
 mfifrjamczjncuym
 otmgvsykuuxrluky
-oiuroieurpyejuvm"""
+oiuroieurpyejuvm
+""".trimIndent()

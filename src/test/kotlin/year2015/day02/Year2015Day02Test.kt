@@ -8,13 +8,13 @@ class Year2015Day02Test {
 
     @Test
     fun part1() {
-        assertThat(AOC2015D02(SAMPLE).solve1()).isEqualTo(101.toString())
-        assertThat(AOC2015D02(INPUT).solve1()).isEqualTo(1588178.toString())
+        assertThat(AOC2015D02(SAMPLE).solve1()).isEqualTo(101)
+        assertThat(AOC2015D02(INPUT).solve1()).isEqualTo(1588178)
     }
 
     @Test
     fun part2() {
-        assertThat(AOC2015D02(SAMPLE).solve2()).isEqualTo(48.toString())
-        assertThat(AOC2015D02(INPUT).solve2()).isEqualTo(3783758.toString())
+        assertThat(AOC2015D02(SAMPLE).solve2()).isEqualTo(48)
+        assertThat(AOC2015D02(INPUT).solve2()).isEqualTo(3783758)
     }
 }

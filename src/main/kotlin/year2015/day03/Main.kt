@@ -8,27 +8,27 @@ fun main() {
     AOC2015D03(INPUT).run()
 }
 
-class AOC2015D03(rawInput: String) : Problem(rawInput) {
-    override fun solve1(): String {
+class AOC2015D03(input: String) : Problem(input) {
+    override fun solve1(): Int {
         val houses = HashMap<Point, Int>()
         var currentHouseSanta = Point(0, 0)
         houses[currentHouseSanta] = 1
 
-        for (dir in rawInput) {
+        for (dir in input) {
             val nextHouse = currentHouseSanta.move(dir)
             houses.merge(nextHouse, 1, Int::plus)
             currentHouseSanta = nextHouse
         }
-        return houses.size.toString()
+        return houses.size
     }
 
-    override fun solve2(): String {
+    override fun solve2(): Int {
         val houses = HashMap<Point, Int>()
         var currentHouseSanta = Point(0, 0)
         var currentHouseRoboSanta = Point(0, 0)
         houses[currentHouseSanta] = 1
 
-        for ((i, dir) in rawInput.withIndex()) {
+        for ((i, dir) in input.withIndex()) {
             if (i % 2 == 0) { // Santa
                 val nextHouse = currentHouseSanta.move(dir)
                 houses.merge(nextHouse, 1, Int::plus)
@@ -39,6 +39,6 @@ class AOC2015D03(rawInput: String) : Problem(rawInput) {
                 currentHouseRoboSanta = nextHouse
             }
         }
-        return houses.size.toString()
+        return houses.size
     }
 }

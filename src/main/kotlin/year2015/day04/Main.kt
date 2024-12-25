@@ -8,21 +8,21 @@ fun main() {
     AOC2015D04(INPUT).run()
 }
 
-class AOC2015D04(rawInput: String) : Problem(rawInput) {
+class AOC2015D04(input: String) : Problem(input) {
     private val fiveZeros = "0".repeat(5)
     private val sixZeros = "0".repeat(6)
 
-    override fun solve1(): String {
-        return firstWithPrefix(fiveZeros).toString()
+    override fun solve1(): Int {
+        return firstWithPrefix(fiveZeros)
     }
 
-    override fun solve2(): String {
-        return firstWithPrefix(sixZeros).toString()
+    override fun solve2(): Int {
+        return firstWithPrefix(sixZeros)
     }
 
     private fun firstWithPrefix(prefix: String): Int {
         return generateSequence(0) { it + 1 }
-            .first { i -> md5(rawInput + i.toString()).startsWith(prefix) }
+            .first { i -> md5(input + i.toString()).startsWith(prefix) }
     }
 }
 

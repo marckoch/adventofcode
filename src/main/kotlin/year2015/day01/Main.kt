@@ -6,7 +6,7 @@ fun main() {
     AOC2015D01(INPUT).run()
 }
 
-class AOC2015D01(rawInput: String) : Problem(rawInput) {
+class AOC2015D01(input: String) : Problem(input) {
     val mapChar = { c: Char ->
         when (c) {
             '(' -> 1
@@ -15,17 +15,15 @@ class AOC2015D01(rawInput: String) : Problem(rawInput) {
         }
     }
 
-    override fun solve1(): String {
-        return rawInput.sumOf { mapChar(it) }.toString()
-    }
+    override fun solve1() = input.sumOf { mapChar(it) }
 
-    override fun solve2(): String {
+    override fun solve2(): Int {
         var total = 0
 
-        for ((i, c) in rawInput.withIndex()) {
+        for ((i, c) in input.withIndex()) {
             total += mapChar(c)
             if (total == -1) {
-                return "${i + 1}"
+                return i + 1
             }
         }
         throw IllegalStateException("should never happen")

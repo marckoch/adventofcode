@@ -8,11 +8,11 @@ class Year2015Day03Test {
 
     @Test
     fun part1() {
-        assertThat(AOC2015D03(INPUT).solve1()).isEqualTo(2572.toString())
+        assertThat(AOC2015D03(INPUT).solve1()).isEqualTo(2572)
     }
 
     @Test
     fun part2() {
-        assertThat(AOC2015D03(INPUT).solve2()).isEqualTo(2631.toString())
+        assertThat(AOC2015D03(INPUT).solve2()).isEqualTo(2631)
     }
 }
