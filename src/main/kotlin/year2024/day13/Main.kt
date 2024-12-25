@@ -1,5 +1,7 @@
 package year2024.day13
 
+import util.parser.readChunks
+
 fun main() {
     AOC2024D13(SAMPLE).solve().let { println(it) } // 480
     AOC2024D13(INPUT).solve().let { println(it) } // 39748
@@ -46,19 +48,5 @@ class AOC2024D13(val input: String) {
         if (aTop % aBottom != 0L) return 0L
 
         return 3L * aTop / aBottom + bTop / bBottom
-    }
-
-    private fun readChunks(input: String): List<List<String>> {
-        return input.lines().fold(mutableListOf<ArrayList<String>>()) { list, line ->
-            if (line.isEmpty()) {
-                list.add(ArrayList())
-            } else {
-                if (list.isEmpty()) {
-                    list.add(ArrayList())
-                }
-                list.last().add(line)
-            }
-            list
-        }
     }
 }

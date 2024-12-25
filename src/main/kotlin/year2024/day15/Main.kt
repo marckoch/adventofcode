@@ -1,5 +1,7 @@
 package year2024.day15
 
+import util.parser.readChunks
+
 fun main() {
 //    AOC2024D15(SAMPLE).solve().also(::println) // 10092
 //    AOC2024D15(SAMPLE2).solve().also(::println) // 2028
@@ -439,19 +441,5 @@ class AOC2024D15(val input: String) {
         }
 
         return map.gpsSum()
-    }
-
-    private fun readChunks(input: String): List<List<String>> {
-        return input.lines().fold(mutableListOf<ArrayList<String>>()) { list, line ->
-            if (line.isEmpty()) {
-                list.add(ArrayList())
-            } else {
-                if (list.isEmpty()) {
-                    list.add(ArrayList())
-                }
-                list.last().add(line)
-            }
-            list
-        }
     }
 }
