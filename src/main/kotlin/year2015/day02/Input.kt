@@ -1,6 +1,12 @@
 package year2015.day02
 
-const val INPUT = """3x11x24
+val SAMPLE = """
+2x3x4
+1x1x10
+""".trimIndent()
+
+val INPUT = """
+3x11x24
 13x5x19
 1x9x27
 24x8x21
@@ -999,7 +1005,5 @@ const val INPUT = """3x11x24
 29x11x20
 3x12x15
 24x25x17
-14x6x11"""
-
-val sides = INPUT.lines()
-    .map { line -> line.split("x").map { it.toInt() } }
+14x6x11
+""".trimIndent()
