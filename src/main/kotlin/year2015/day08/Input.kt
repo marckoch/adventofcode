@@ -1,11 +1,14 @@
 package year2015.day08
 
-const val TEST_INPUT = """""
+val SAMPLE = """
+""
 "abc"
 "aaa\"aaa"
-"\x27""""
+"\x27"
+""".trimIndent()
 
-const val INPUT = """"\xa8br\x8bjr\""
+val INPUT = """
+"\xa8br\x8bjr\""
 "nq"
 "zjrfcpbktjmrzgsz\xcaqsc\x03n\"huqab"
 "daz\\zyyxddpwk"
@@ -304,4 +307,5 @@ const val INPUT = """"\xa8br\x8bjr\""
 "yrtdrieazfxyyneo"
 "nywbv\\"
 "twc\\ehfqxhgomgrgwpxyzmnkioj"
-"qludrkkvljljd\\xvdeum\x4e""""
+"qludrkkvljljd\\xvdeum\x4e"
+""".trimIndent()
