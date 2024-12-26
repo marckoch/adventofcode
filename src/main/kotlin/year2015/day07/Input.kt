@@ -1,93 +1,7 @@
 package year2015.day07
 
-// all in all not very pretty, but gets the correct result
-// TODO: needs some cleaning up
-
-const val DIGIT = "(-?\\d*)"
-const val WORD = "(\\w*)"
-val CLEAR_INSTRUCTION = "$DIGIT -> $WORD".toRegex()
-val AND_INSTRUCTION = "$DIGIT AND $DIGIT -> $WORD".toRegex()
-val OR_INSTRUCTION = "$DIGIT OR $DIGIT -> $WORD".toRegex()
-val LSHIFT_INSTRUCTION = "$DIGIT LSHIFT $DIGIT -> $WORD".toRegex()
-val RSHIFT_INSTRUCTION = "$DIGIT RSHIFT $DIGIT -> $WORD".toRegex()
-val NOT_INSTRUCTION = "NOT $DIGIT -> $WORD".toRegex()
-
-fun reduce(instructions: List<String>): List<String> {
-    // extract clear signals (clear signal means: 'number -> wire', left side is completely evaluated)
-    val (clearSignals, remainingInstructions) = instructions.partition { s ->
-        CLEAR_INSTRUCTION.matches(s)
-    }
-    println("clearSignals: $clearSignals")
-    println("remainingInstructions: $remainingInstructions")
-
-    return remainingInstructions
-        .map { i ->
-            // merge clear signals into remaining instructions
-            replaceWireWithSignal(i, clearSignals)
-        }
-        .map { i ->
-            // reduce signals, that means evaluate operators that have all variables filled/replaced
-            reduceSignals(i)
-        }
-}
-
-// here we take the list of signals (e.g. '123 -> c') and replace the wire 'c'
-// in all other given instructions with its signal value '123',
-// e.g. the instruction 'c AND lc -> f' will become '123 AND lc -> f' after
-// merging it with the signal '123 -> c'
-fun replaceWireWithSignal(instruction: String, signals: List<String>): String {
-    var i = instruction
-
-    signals.forEach { sig ->
-        val (signal, wire) = CLEAR_INSTRUCTION.find(sig)!!.destructured
-        i = i.replace(("\\b+$wire\\b+").toRegex(), signal)
-    }
-
-    if (i != instruction) {
-        println("'$instruction' changed to '$i'")
-    }
-
-    return i
-}
-
-// here we check if on the left side we can evaluate the operation, that means:
-// on the left side we only have numbers and operations, all variables/wires on
-// the left have been replaced with their signal value,
-// e.g. '123 AND 456 -> d' will become '72 -> d'
-// (because we replaced '123 AND 456' with its result '72')
-fun reduceSignals(instruction: String): String {
-    var i = instruction
-
-    if (AND_INSTRUCTION.matches(i)) {
-        val (a, b, wire) = AND_INSTRUCTION.find(i)!!.destructured
-        val newSignal = a.toInt() and b.toInt()
-        i = "$newSignal -> $wire"
-    } else if (OR_INSTRUCTION.matches(i)) {
-        val (a, b, wire) = OR_INSTRUCTION.find(i)!!.destructured
-        val newSignal = a.toInt() or b.toInt()
-        i = "$newSignal -> $wire"
-    } else if (LSHIFT_INSTRUCTION.matches(i)) {
-        val (a, b, wire) = LSHIFT_INSTRUCTION.find(i)!!.destructured
-        val newSignal = a.toInt() shl b.toInt()
-        i = "$newSignal -> $wire"
-    } else if (RSHIFT_INSTRUCTION.matches(i)) {
-        val (a, b, wire) = RSHIFT_INSTRUCTION.find(i)!!.destructured
-        val newSignal = a.toInt() shr b.toInt()
-        i = "$newSignal -> $wire"
-    } else if (NOT_INSTRUCTION.matches(i)) {
-        val (a, wire) = NOT_INSTRUCTION.find(i)!!.destructured
-        val newSignal = a.toInt().inv()
-        i = "$newSignal -> $wire"
-    }
-
-    if (i != instruction) {
-        println("'$instruction' evaluated to '$i'")
-    }
-
-    return i
-}
-
-const val INPUT = """bn RSHIFT 2 -> bo
+val INPUT = """
+bn RSHIFT 2 -> bo
 lf RSHIFT 1 -> ly
 fo RSHIFT 3 -> fq
 cj OR cp -> cq
@@ -425,4 +339,5 @@ hv OR hu -> hw
 ab AND ad -> ae
 NOT ac -> ad
 1 AND ht -> hu
-NOT hn -> ho"""
+NOT hn -> ho
+""".trimIndent()
