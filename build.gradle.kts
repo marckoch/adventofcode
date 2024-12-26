@@ -11,6 +11,8 @@ repositories {
 }
 
 dependencies {
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+
     testImplementation(kotlin("test"))
     testImplementation("com.willowtreeapps.assertk:assertk:0.27.0")
 }
