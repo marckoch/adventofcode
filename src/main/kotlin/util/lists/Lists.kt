@@ -25,12 +25,3 @@ fun <T> List<T>.permute(): List<List<T>> {
     }
     return perms
 }
-
-// get index of 'e' in 'list'.
-// if 'e' is not in 'list', insert 'e' first at end of 'list'
-fun <T> MutableList<T>.indexOfOrPut(e: T): Int {
-    if (!this.contains(e)) {
-        this.add(e)
-    }
-    return this.indexOf(e)
-}
