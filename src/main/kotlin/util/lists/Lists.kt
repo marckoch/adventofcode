@@ -1,5 +1,8 @@
 package util.lists
 
+import java.util.*
+import kotlin.NoSuchElementException
+
 inline fun <T> List<T>.singleOrException(predicate: (T) -> Boolean): T {
     val filtered = this.filter(predicate)
     return when {
@@ -50,4 +53,61 @@ fun <T> List<T>.powerSetBitwise(): List<List<T>> {
         powerSet.add(subset)
     }
     return powerSet
+}
+
+// https://rosettacode.org/wiki/Combinations#Kotlin
+// very general solution: build all combinations of size m out of elements of arr
+// NO REPETITION!
+inline fun <reified T> combinations(arr: List<T>, m: Int) = sequence {
+    val n = arr.size
+    val result = Array(m) { arr[0] }
+    val stack = LinkedList<Int>()
+    stack.push(0)
+    while (stack.isNotEmpty()) {
+        var resIndex = stack.size - 1;
+        var arrIndex = stack.pop()
+
+        while (arrIndex < n) {
+            result[resIndex++] = arr[arrIndex++]
+            stack.push(arrIndex)
+
+            if (resIndex == m) {
+                yield(result.toList())
+                break
+            }
+        }
+    }
+}
+
+
+fun <T> Iterable<T>.combinations(k: Int): Sequence<List<T>> =
+    sequence {
+        val pool = this@combinations as? List<T> ?: toList()
+        val n = pool.size
+        if (k > n) return@sequence
+        val indices = IntArray(k) { it }
+        while (true) {
+            yield(indices.map { pool[it] })
+            var i = k
+            do {
+                if (i-- == 0) return@sequence
+            } while (indices[i] == i + n - k)
+            indices[i]++
+            for (j in i + 1 until k) indices[j] = indices[j - 1] + 1
+        }
+    }
+
+// https://rosettacode.org/wiki/Power_set#Kotlin
+fun <T> Set<T>.subsets(): Sequence<Set<T>> = sequence {
+    when (size) {
+        0 -> yield(emptySet<T>())
+        else -> {
+            val head = first()
+            val tail = this@subsets - head
+            yieldAll(tail.subsets())
+            for (subset in tail.subsets()) {
+                yield(setOf(head) + subset)
+            }
+        }
+    }
 }
