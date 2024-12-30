@@ -1,9 +1,10 @@
 package util.point
 
-import util.graph.Direction
+import util.direction.Direction
 import kotlin.math.abs
 
 typealias Point = Pair<Int, Int> // (row, col), e.g. (y, x)
+
 
 fun Point.neighbors(): List<Point> {
     val north = this.copy(first = first - 1)
@@ -40,6 +41,15 @@ fun Point.move(c: Char): Point {
         '<' ->  this.copy(first = this.first - 1)
         '>' -> this.copy(first = this.first + 1)
         else -> this
+    }
+}
+
+fun Point.move(dir: Direction, steps: Int): Point {
+    return when (dir) {
+        Direction.NORTH -> this.copy(first = this.first + steps)
+        Direction.SOUTH -> this.copy(first = this.first - steps)
+        Direction.WEST -> this.copy(second = this.second - steps)
+        Direction.EAST -> this.copy(second = this.second + steps)
     }
 }
 

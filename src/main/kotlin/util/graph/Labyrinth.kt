@@ -6,28 +6,6 @@ import java.util.*
 import java.util.function.BiFunction
 import kotlin.collections.ArrayDeque
 
-enum class Direction {
-    NORTH, WEST, SOUTH, EAST;
-
-    fun turnLeft(): Direction {
-        return when (this) {
-            NORTH -> WEST
-            WEST -> SOUTH
-            SOUTH -> EAST
-            EAST -> NORTH
-        }
-    }
-
-    fun turnRight(): Direction {
-        return when (this) {
-            NORTH -> EAST
-            EAST -> SOUTH
-            SOUTH -> WEST
-            WEST -> NORTH
-        }
-    }
-}
-
 class Labyrinth(private val fields: List<CharArray>,
                 val start: Point = Point(0, 0),
                 val end: Point = Point(fields.first().size - 1,  fields.size - 1)) {

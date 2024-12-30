@@ -1,6 +1,6 @@
 package year2024.day16
 
-import util.graph.Direction
+import util.direction.Direction
 import util.graph.Labyrinth
 import util.point.Point
 import java.util.*
