@@ -111,3 +111,16 @@ fun <T> Set<T>.subsets(): Sequence<Set<T>> = sequence {
         }
     }
 }
+
+// rotate all members left by 'shift', wrap around
+// rotate(listOf(1,2,3,4), 1) -> 2,3,4,1
+fun <T> List<T>.rotateLeft(shift: Int): List<T> {
+    if (isEmpty()) return this
+    val effectiveShift = shift % size
+    val normalizedShift = if (effectiveShift < 0) effectiveShift + size else effectiveShift
+    return drop(normalizedShift) + take(normalizedShift)
+}
+
+// rotate all members left by 'shift', wrap around
+// rotate(listOf(1,2,3,4), 1) -> 2,3,4,1
+fun <T> List<T>.rotateRight(shift: Int): List<T> = rotateLeft(-shift)
