@@ -5,7 +5,7 @@ fun Regex.findTokens(s: String): List<String> {
     if (m != null)
         return m.destructured.toList()
     else
-        throw Exception("Could not find '$s' in '$this'")
+        throw Exception("Could not find '$this' in '$s'")
 }
 
 fun String.asInts(delimiter: String = " "): List<Int> {
