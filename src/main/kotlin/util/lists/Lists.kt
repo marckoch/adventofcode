@@ -128,3 +128,5 @@ fun <T> List<T>.rotateLeft(shift: Int): List<T> {
 // rotate all members left by 'shift', wrap around
 // rotate(listOf(1,2,3,4), 1) -> 2,3,4,1
 fun <T> List<T>.rotateRight(shift: Int): List<T> = rotateLeft(-shift)
+
+fun <T> List<T>.areAllEqual() = this.distinct().size == 1
