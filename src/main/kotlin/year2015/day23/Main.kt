@@ -9,62 +9,44 @@ fun main() {
 }
 
 class AOC2015D23(input: String) : Problem(input) {
-    var a = 0
-    var b = 0
+    override fun solve1() = run(State(a = 0, b = 0, pos = 0))
+    override fun solve2() = run(State(a = 1, b = 0, pos = 0))
 
-    override fun solve1() = run(0)
-    override fun solve2() = run(1)
-
-    private fun run(initialA: Int): Int {
-        // reset state to initial values before run
-        a = initialA
-        b = 0
-
-        var pos = 0
-
+    private fun run(initial: State): Int {
         val instructions = inputLines().map { parseInstruction(it) }
-        while (pos in instructions.indices) {
-            val (operation, register, offset) = instructions[pos]
-            when (operation) {
-                Instruction.HLF -> {
-                    modifyRegister(register) { it / 2 }
-                    pos++
-                }
-                Instruction.TPL -> {
-                    modifyRegister(register) { it * 3 }
-                    pos++
-                }
-                Instruction.INC -> {
-                    modifyRegister(register) { it + 1 }
-                    pos++
-                }
-                Instruction.JMP -> pos += offset!!
-                Instruction.JIE -> {
-                    if (getRegisterValue(register).isEven()) pos += offset!! else pos++
-                }
-                Instruction.JIO -> {
-                    if (getRegisterValue(register) == 1) pos += offset!! else pos++
-                }
-            }
+
+        var currentState = initial
+        while (currentState.pos in instructions.indices) {
+            val instruction = instructions[currentState.pos]
+            currentState = instruction.modify(currentState)
         }
-        return b
+        return currentState.b
     }
 
-    private fun parseInstruction(line: String): InstructionData {
+    private fun parseInstruction(line: String): Instruction {
         val parts = line.replace(",", "").split(" ")
-        val operation = Instruction.valueOf(parts[0].uppercase())
+        return when (parts[0]) {
+            "hlf" -> Half(register = parts[1])
+            "tpl" -> Triple(register = parts[1])
+            "inc" -> Inc(register = parts[1])
+            "jmp" -> Jump(offset = parts[1].toInt())
+            "jie" -> JumpIfEven(register = parts[1], offset = parts[2].toInt())
+            "jio" -> JumpIfOne(register = parts[1], offset = parts[2].toInt())
+            else -> error("Unknown operation in line: $line")
+        }
+    }
+}
 
-        if (operation == Instruction.JMP) {
-            val offset = parts[1].toInt()
-            return InstructionData(operation, null, offset)
-        } else {
-            val register = parts.getOrNull(1)
-            val offset = parts.getOrNull(2)?.toInt()
-            return InstructionData(operation, register, offset)
+data class State(val a: Int, val b: Int, val pos: Int) {
+    fun modifyRegister(register: String, operation: (Int) -> Int): State {
+        return when (register) {
+            "a" -> this.copy(a = operation(a))
+            "b" -> this.copy(b = operation(b))
+            else -> throw IllegalArgumentException("Unknown register: $register")
         }
     }
 
-    private fun getRegisterValue(register: String?): Int {
+    fun getRegisterValue(register: String): Int {
         return when (register) {
             "a" -> a
             "b" -> b
@@ -72,20 +54,43 @@ class AOC2015D23(input: String) : Problem(input) {
         }
     }
 
-    private fun modifyRegister(register: String?, operation: (Int) -> Int) {
-        when (register) {
-            "a" -> a = operation(a)
-            "b" -> b = operation(b)
-        }
+    fun incPos(offset: Int = 1) = this.copy(pos = pos + offset)
+}
+
+interface Instruction {
+    fun modify(state: State): State
+}
+
+class Half(private val register: String) : Instruction {
+    override fun modify(state: State): State {
+        return state.modifyRegister(register) { it / 2 }.incPos()
     }
+}
 
-    private data class InstructionData(
-        val operation: Instruction,
-        val register: String?,
-        val offset: Int?
-    )
+class Triple(private val register: String) : Instruction {
+    override fun modify(state: State): State {
+        return state.modifyRegister(register) { it * 3 }.incPos()
+    }
+}
 
-    private enum class Instruction {
-        HLF, TPL, INC, JMP, JIE, JIO
+class Inc(private val register: String) : Instruction {
+    override fun modify(state: State): State {
+        return state.modifyRegister(register, Int::inc).incPos()
+    }
+}
+
+class Jump(private val offset: Int) : Instruction {
+    override fun modify(state: State) = state.incPos(offset = offset)
+}
+
+class JumpIfEven(private val register: String, private val offset: Int) : Instruction {
+    override fun modify(state: State): State {
+        return state.incPos(offset = if (state.getRegisterValue(register).isEven()) offset else 1)
+    }
+}
+
+class JumpIfOne(private val register: String, private val offset: Int) : Instruction {
+    override fun modify(state: State): State {
+        return state.incPos(offset = if (state.getRegisterValue(register) == 1) offset else 1)
     }
 }
