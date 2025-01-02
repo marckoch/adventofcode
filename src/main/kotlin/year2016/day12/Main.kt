@@ -29,7 +29,7 @@ class AOC2016D12(input: String) : Problem(input) {
             "cpy" -> Copy(source = parts[1], register = parts[2])
             "inc" -> Inc(register = parts[1])
             "dec" -> Dec(register = parts[1])
-            "jnz" -> JumpNotZero(register = parts[1], offset = parts[2].toInt())
+            "jnz" -> JumpNotZero(source = parts[1], offset = parts[2].toInt())
             else -> error("Unknown operation in line: $line")
         }
     }
@@ -56,7 +56,7 @@ data class State(val a: Int, val b: Int, val c: Int, val d: Int, val pos: Int) {
         }
     }
 
-    fun getValue(v: String): Int {
+    fun resolve(v: String): Int {
         return if (v.isNumber()) {
             v.toInt()
         } else {
@@ -73,7 +73,7 @@ interface Instruction {
 
 class Copy(private val source: String, private val register: String) : Instruction {
     override fun modify(state: State): State {
-        return state.modifyRegister(register) { state.getValue(source) }.incPos()
+        return state.modifyRegister(register) { state.resolve(source) }.incPos()
     }
 }
 
@@ -89,8 +89,8 @@ class Dec(private val register: String) : Instruction {
     }
 }
 
-class JumpNotZero(private val register: String, private val offset: Int) : Instruction {
+class JumpNotZero(private val source: String, private val offset: Int) : Instruction {
     override fun modify(state: State): State {
-        return state.incPos(offset = if (state.getValue(register) != 0) offset else 1)
+        return state.incPos(offset = if (state.resolve(source) != 0) offset else 1)
     }
 }
