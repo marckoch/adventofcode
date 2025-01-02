@@ -12,6 +12,10 @@ inline fun <T> List<T>.singleOrException(predicate: (T) -> Boolean): T {
     }
 }
 
+fun <T, U> List<T>.cartesianProduct(other: List<U>): List<Pair<T, U>> {
+    return this.flatMap { t -> other.map { u -> t to u } }
+}
+
 // https://rosettacode.org/wiki/Permutations#Kotlin
 fun <T> List<T>.permute(): List<List<T>> {
     if (this.size == 1) return listOf(this)
