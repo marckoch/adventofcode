@@ -39,7 +39,7 @@ class AOC2016D13(input: String) : Problem(input) {
                 }
             }
         }
-        error("No path path to target found!")
+        error("No path to target found!")
     }
 
     // visit all points max 'limit' away from 'from'
