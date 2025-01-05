@@ -1,7 +1,6 @@
 package year2016.day12
 
 import adventofcode.Problem
-import util.strings.isNumber
 
 fun main() {
     AOC2016D12(SAMPLE).run()
@@ -57,11 +56,7 @@ data class State(val a: Int, val b: Int, val c: Int, val d: Int, val pos: Int) {
     }
 
     fun resolve(v: String): Int {
-        return if (v.isNumber()) {
-            v.toInt()
-        } else {
-            getRegisterValue(v)
-        }
+        return v.toIntOrNull() ?: getRegisterValue(v)
     }
 
     fun incPos(offset: Int = 1) = this.copy(pos = pos + offset)
