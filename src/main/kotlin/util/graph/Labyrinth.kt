@@ -26,24 +26,24 @@ class Labyrinth(private val fields: List<CharArray>,
          * #S..#.#
          * #######
          */
-        fun fromStrings(strings: List<String>): Labyrinth {
+        fun fromStrings(strings: List<String>, start: Char = 'S', end: Char = 'E'): Labyrinth {
             val height: Int = strings.size
             val width: Int = strings.first().length
-            var start: Point = Point(0, 0)
-            var end: Point = Point(width - 1, height - 1)
+            var startPos: Point = Point(0, 0)
+            var endPos: Point = Point(width - 1, height - 1)
             val fields = List(height) { CharArray(width) { '.' } }
 
             strings.withIndex().forEach { (row, line) ->
                 line.withIndex().forEach { (column, char) ->
                     fields[row][column] = char
-                    if (char == 'S') {
-                        start = Point(row, column)
-                    } else if (char == 'E') {
-                        end = Point(row, column)
+                    if (char == start) {
+                        startPos = Point(row, column)
+                    } else if (char == end) {
+                        endPos = Point(row, column)
                     }
                 }
             }
-            return Labyrinth(fields, start, end)
+            return Labyrinth(fields, startPos, endPos)
         }
     }
 
@@ -56,7 +56,8 @@ class Labyrinth(private val fields: List<CharArray>,
 
     // https://www.baeldung.com/cs/simple-paths-between-two-vertices
     private fun dfs(
-        from: Point, to: Point,
+        from: Point,
+        to: Point,
         currentPath: ArrayDeque<Point>,
         paths: MutableList<List<Point>>,
         visited: MutableList<Point>
@@ -83,7 +84,7 @@ class Labyrinth(private val fields: List<CharArray>,
         currentPath.removeLast()
     }
 
-    fun bfs(): List<List<Point>> {
+    fun bfsAllPaths(): List<List<Point>> {
         val paths = mutableListOf<List<Point>>()
         val visited = mutableListOf<Point>()
         bfs(start, end, ArrayDeque(), paths, visited)
@@ -207,7 +208,7 @@ class Labyrinth(private val fields: List<CharArray>,
     }
 
     fun isInsideMap(p: Point): Boolean {
-        return p.first in 0 until width && p.second in 0 until height
+        return p.first in 0 until height && p.second in 0 until width
     }
 
     fun isNotObstacle(p: Point): Boolean {
