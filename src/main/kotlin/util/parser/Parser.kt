@@ -8,8 +8,12 @@ fun Regex.findTokens(s: String): List<String> {
         throw Exception("Could not find pattern '$this' in input string '$s'")
 }
 
-fun String.asInts(delimiter: String = " "): List<Int> {
-    return this.split(delimiter).map { it.toInt() }
+fun String.asInts(delimiter: String): List<Int> {
+    return this.split(delimiter).map { it.trim().toInt() }
+}
+
+fun String.asInts(delimiter: Regex = Regex("\\s+")): List<Int> {
+    return this.split(delimiter).map { it.trim().toInt() }
 }
 
 fun readChunks(input: String): List<List<String>> {
